@@ -196,13 +196,27 @@ document.getElementById("btnAssignRoles").addEventListener("click", () => {
   showView(viewRoleCard);
 });
 
-// --- MOSTRA CARTA RUOLO ---
+// --- MOSTRA CARTA RUOLO (con layout personalizzato per ogni ruolo) ---
 function showMyRole(role) {
-  document.getElementById("roleName").innerText = role.label;
-  document.getElementById("roleDescription").innerText = role.description;
-  showView(viewRoleCard);
+  const roleCard = document.getElementById("viewRoleCard");
+  roleCard.innerHTML = `
+    <div class="role-container role-${role.name.toLowerCase()}">
+      <div class="role-header">LUPUS</div>
+      <div class="role-image">
+        <img src="./img/${role.name.toLowerCase()}.png" alt="${role.name}" />
+      </div>
+      <h2 class="role-title">${role.name.toUpperCase()}</h2>
+      <div class="role-description">
+        <p>${role.description}</p>
+      </div>
+      <div class="role-actions">
+        <button id="btnEndGame" class="btn primary">Termina partita</button>
+        <button id="btnCloseGame" class="btn">Chiudi partita</button>
+      </div>
+    </div>
+  `;
+  showView(roleCard);
 }
-
 // --- UTILITY: shuffle ---
 function shuffleArray(array) {
   return array.sort(() => Math.random() - 0.5);

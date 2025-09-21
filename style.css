@@ -86,3 +86,59 @@ body {
   cursor: pointer;
   border-radius: 6px;
 }
+
+.role-container {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #1b263b;
+}
+
+.role-header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.role-image img {
+  width: 150px;
+  height: auto;
+  margin: 1rem 0;
+}
+
+.role-title {
+  font-size: 2rem;
+  margin: 0.5rem 0;
+  color: white;
+}
+
+.role-description {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.role-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.role-lupo {
+  background: #1d3557;
+}
+
+.role-contadino {
+  background: #6d4c41;
+}
+
+.role-veggente {
+  background: #7b2cbf;
+}
+
+.role-guardia {
+  background: #457b9d;
+}
