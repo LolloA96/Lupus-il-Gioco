@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lupus - Gioca con gli amici</title>
+  <link rel="stylesheet" href="style.css" />
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="root" class="root">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">LUPUS</div>
+      </div>
+    </header>
+
+    <!-- VIEWS (solo una visibile alla volta) -->
+    <main class="container">
+      
+      <!-- HOME -->
+      <section id="viewHome" class="view card">
+        <h2>Benvenuto</h2>
+        <div class="card-sub">
+          <h3>Crea una partita</h3>
+          <label>Nome della stanza</label>
+          <input id="inputRoomNameCreate" type="text" placeholder="Es. Partita amici" />
+
+          <label>Il tuo nome</label>
+          <input id="inputNameCreate" type="text" placeholder="Es. Lorenzo" />
+
+          <button id="btnCreate" class="btn primary">Crea partita</button>
+        </div>
+
+        <div class="card-sub">
+          <h3>Entra in una stanza</h3>
+          <label>Il tuo nome</label>
+          <input id="inputNameJoin" type="text" placeholder="Es. Giulia" />
+
+          <label>ID stanza</label>
+          <input id="inputRoomId" type="text" placeholder="Codice stanza" />
+
+          <button id="btnJoin" class="btn">Entra</button>
+        </div>
+      </section>
+
+      <!-- STANZA -->
+      <section id="viewRoom" class="view card hidden">
+        <h2 id="roomTitle">Benvenuto nella stanza</h2>
+        <ul id="playerList"></ul>
+        <button id="btnStartGame" class="btn primary">Inizia partita</button>
+      </section>
+
+      <!-- SCELTA PERSONAGGI -->
+      <section id="viewRoles" class="view card hidden">
+        <h2>Scegli i personaggi</h2>
+        <div id="rolesList"></div>
+        <button id="btnAssignRoles" class="btn primary">Assegna ruoli</button>
+      </section>
+
+      <!-- CARTA RUOLO -->
+      <section id="viewRoleCard" class="view card hidden">
+        <h2 id="roleName"></h2>
+        <p id="roleDescription"></p>
+        <button id="btnEndGame" class="btn">Termina partita</button>
+      </section>
+    </main>
+  </div>
+
+<!-- Config e logica -->
+<script src="./firebase-config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
