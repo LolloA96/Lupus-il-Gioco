@@ -109,3 +109,44 @@ btnStartGame.addEventListener("click", () => {
   if (!isHost) return alert("Solo l'host può iniziare la partita");
   showView(viewRoles);
 });
+
+// --- RUOLI DISPONIBILI ---
+const roles = [
+  { name: "Lupo", description: "Il lupo elimina un giocatore a turno." },
+  { name: "Contadino", description: "Un semplice contadino senza poteri." },
+  { name: "Veggente", description: "Ogni notte può scoprire il ruolo di un giocatore." },
+  { name: "Guardia", description: "Può proteggere un giocatore per turno." }
+];
+
+// --- MOSTRA LISTA RUOLI ---
+function showRolesList() {
+  const rolesList = document.getElementById("rolesList");
+  rolesList.innerHTML = "";
+
+  roles.forEach(role => {
+    const div = document.createElement("div");
+    div.classList.add("role-card");
+    div.innerHTML = `<strong>${role.name}</strong><p>${role.description}</p>`;
+    rolesList.appendChild(div);
+  });
+}
+
+// --- ASSEGNA RUOLI AI GIOCATORI ---
+document.getElementById("btnAssignRoles").addEventListener("click", () => {
+  db.collection("rooms").doc(currentRoomId).update({
+    assignedRoles: shuffleArray(roles).slice(0, playerList.childNodes.length)
+  });
+  showView(viewRoleCard);
+});
+
+// --- MOSTRA CARTA RUOLO (esempio semplificato) ---
+function showMyRole(role) {
+  document.getElementById("roleName").innerText = role.name;
+  document.getElementById("roleDescription").innerText = role.description;
+  showView(viewRoleCard);
+}
+
+// --- UTILITY: mescola array ---
+function shuffleArray(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
