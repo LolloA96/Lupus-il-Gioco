@@ -48,3 +48,41 @@ body {
 .hidden {
   display: none;
 }
+
+/* --- STILE RUOLI --- */
+.roles-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.role-card {
+  background: #fff;
+  color: #000;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.role-card img {
+  max-width: 100px;
+  margin-bottom: 8px;
+}
+
+.role-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.role-controls button {
+  background: #eee;
+  border: none;
+  padding: 6px 12px;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 6px;
+}

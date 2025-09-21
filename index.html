@@ -6,9 +6,9 @@
   <title>Lupus - Gioca con gli amici</title>
   <link rel="stylesheet" href="style.css" />
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div id="root" class="root">
@@ -19,7 +19,7 @@
       </div>
     </header>
 
-    <!-- VIEWS (solo una visibile alla volta) -->
+    <!-- VIEWS -->
     <main class="container">
       
       <!-- HOME -->
@@ -57,8 +57,9 @@
 
       <!-- SCELTA PERSONAGGI -->
       <section id="viewRoles" class="view card hidden">
-        <h2>Scegli i personaggi</h2>
-        <div id="rolesList"></div>
+        <h2>Tutti i personaggi</h2>
+        <p>Scegli i personaggi per la tua partita</p>
+        <div id="rolesContainer" class="roles-grid"></div>
         <button id="btnAssignRoles" class="btn primary">Assegna ruoli</button>
       </section>
 
@@ -71,8 +72,8 @@
     </main>
   </div>
 
-<!-- Config e logica -->
-<script src="./firebase-config.js"></script>
-<script src="./app.js"></script>
+  <!-- Config e logica -->
+  <script src="./firebase-config.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>

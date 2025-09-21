@@ -1,5 +1,3 @@
-// app.js
-
 let currentRoomId = null;
 let currentPlayerName = null;
 let isHost = false;
@@ -36,7 +34,7 @@ btnCreate.addEventListener("click", async () => {
     const roomRef = await db.collection("rooms").add({
       createdAt: Date.now(),
       roomName: roomName,
-      players: [playerName] // 👈 host con il suo vero nome
+      players: [playerName]
     });
 
     currentRoomId = roomRef.id;
@@ -107,46 +105,105 @@ function subscribeToRoom(roomId) {
 // --- INIZIA PARTITA (solo host) ---
 btnStartGame.addEventListener("click", () => {
   if (!isHost) return alert("Solo l'host può iniziare la partita");
+  renderRolesUI();
   showView(viewRoles);
 });
 
 // --- RUOLI DISPONIBILI ---
-const roles = [
-  { name: "Lupo", description: "Il lupo elimina un giocatore a turno." },
-  { name: "Contadino", description: "Un semplice contadino senza poteri." },
-  { name: "Veggente", description: "Ogni notte può scoprire il ruolo di un giocatore." },
-  { name: "Guardia", description: "Può proteggere un giocatore per turno." }
+const ROLES = [
+  { id: "lupo", label: "Lupo", description: "Il lupo elimina un giocatore a turno.", img: "img/lupo.png" },
+  { id: "contadino", label: "Contadino", description: "Un semplice contadino senza poteri.", img: "img/contadino.png" },
+  { id: "comandante", label: "Comandante", description: "Guida i contadini.", img: "img/comandante.png" },
+  { id: "veggente", label: "Veggente", description: "Scopre il ruolo di un giocatore a notte.", img: "img/veggente.png" },
+  { id: "mitomane", label: "Mitomane", description: "Si crede qualcun altro.", img: "img/mitomane.png" },
+  { id: "strega", label: "Strega", description: "Può salvare o eliminare qualcuno.", img: "img/strega.png" }
 ];
 
-// --- MOSTRA LISTA RUOLI ---
-function showRolesList() {
-  const rolesList = document.getElementById("rolesList");
-  rolesList.innerHTML = "";
+const selectedCounts = {};
+ROLES.forEach(r => selectedCounts[r.id] = 0);
 
-  roles.forEach(role => {
-    const div = document.createElement("div");
-    div.classList.add("role-card");
-    div.innerHTML = `<strong>${role.name}</strong><p>${role.description}</p>`;
-    rolesList.appendChild(div);
+// --- RENDER CARD RUOLI ---
+function renderRolesUI() {
+  const container = document.getElementById("rolesContainer");
+  container.innerHTML = "";
+
+  ROLES.forEach(role => {
+    const card = document.createElement("div");
+    card.className = "role-card";
+
+    const img = document.createElement("img");
+    img.src = role.img;
+    img.alt = role.label;
+    card.appendChild(img);
+
+    const name = document.createElement("h3");
+    name.innerText = role.label;
+    card.appendChild(name);
+
+    const controls = document.createElement("div");
+    controls.className = "role-controls";
+
+    const minus = document.createElement("button");
+    minus.innerText = "−";
+    minus.onclick = () => {
+      if (selectedCounts[role.id] > 0) {
+        selectedCounts[role.id]--;
+        updateCount(role.id);
+      }
+    };
+
+    const count = document.createElement("span");
+    count.id = `count-${role.id}`;
+    count.innerText = selectedCounts[role.id];
+
+    const plus = document.createElement("button");
+    plus.innerText = "+";
+    plus.onclick = () => {
+      selectedCounts[role.id]++;
+      updateCount(role.id);
+    };
+
+    controls.appendChild(minus);
+    controls.appendChild(count);
+    controls.appendChild(plus);
+
+    card.appendChild(controls);
+    container.appendChild(card);
   });
+}
+
+function updateCount(roleId) {
+  document.getElementById(`count-${roleId}`).innerText = selectedCounts[roleId];
 }
 
 // --- ASSEGNA RUOLI AI GIOCATORI ---
 document.getElementById("btnAssignRoles").addEventListener("click", () => {
-  db.collection("rooms").doc(currentRoomId).update({
-    assignedRoles: shuffleArray(roles).slice(0, playerList.childNodes.length)
+  const allRoles = [];
+  Object.keys(selectedCounts).forEach(roleId => {
+    for (let i = 0; i < selectedCounts[roleId]; i++) {
+      allRoles.push(ROLES.find(r => r.id === roleId));
+    }
   });
+
+  if (allRoles.length < playerList.childNodes.length) {
+    return alert("Non hai selezionato abbastanza ruoli per tutti i giocatori!");
+  }
+
+  db.collection("rooms").doc(currentRoomId).update({
+    assignedRoles: shuffleArray(allRoles).slice(0, playerList.childNodes.length)
+  });
+
   showView(viewRoleCard);
 });
 
-// --- MOSTRA CARTA RUOLO (esempio semplificato) ---
+// --- MOSTRA CARTA RUOLO ---
 function showMyRole(role) {
-  document.getElementById("roleName").innerText = role.name;
+  document.getElementById("roleName").innerText = role.label;
   document.getElementById("roleDescription").innerText = role.description;
   showView(viewRoleCard);
 }
 
-// --- UTILITY: mescola array ---
+// --- UTILITY: shuffle ---
 function shuffleArray(array) {
   return array.sort(() => Math.random() - 0.5);
 }
