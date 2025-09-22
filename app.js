@@ -1,4 +1,4 @@
-// app.js (versione aggiornata)
+// app.js (versione aggiornata con roomName come ID)
 
 let currentRoomId = null;
 let currentPlayerName = null;
@@ -44,7 +44,15 @@ btnCreate.addEventListener("click", async () => {
   }
 
   try {
-    const roomRef = await db.collection("rooms").add({
+    const roomRef = db.collection("rooms").doc(roomName);
+    const roomDoc = await roomRef.get();
+
+    if (roomDoc.exists) {
+      alert("⚠️ Esiste già una stanza con questo nome. Scegli un altro nome.");
+      return;
+    }
+
+    await roomRef.set({
       createdAt: Date.now(),
       roomName: roomName,
       players: [playerName],
@@ -52,15 +60,13 @@ btnCreate.addEventListener("click", async () => {
       ended: false
     });
 
-    currentRoomId = roomRef.id;
+    currentRoomId = roomName; // usiamo il nome come ID
     currentPlayerName = playerName;
     isHost = true;
 
     console.log("✅ Stanza creata:", currentRoomId, "Giocatore:", currentPlayerName);
 
-    document.getElementById("roomTitle").innerText =
-      `Stanza: ${roomName} (ID: ${currentRoomId})`;
-
+    document.getElementById("roomTitle").innerText = `Stanza: ${roomName}`;
     showView(viewRoom);
     subscribeToRoom(currentRoomId);
   } catch (err) {
@@ -72,19 +78,19 @@ btnCreate.addEventListener("click", async () => {
 // --- ENTRA IN STANZA ---
 btnJoin.addEventListener("click", async () => {
   const name = document.getElementById("inputNameJoin").value.trim();
-  const roomId = document.getElementById("inputRoomId").value.trim();
+  const roomName = document.getElementById("inputRoomId").value.trim();
 
-  if (!name || !roomId) {
-    alert("Inserisci nome e ID stanza!");
+  if (!name || !roomName) {
+    alert("Inserisci nome e nome della stanza!");
     return;
   }
 
   try {
-    const roomRef = db.collection("rooms").doc(roomId);
+    const roomRef = db.collection("rooms").doc(roomName);
     const roomDoc = await roomRef.get();
 
     if (!roomDoc.exists) {
-      alert("Stanza non trovata");
+      alert("⚠️ Stanza non trovata");
       return;
     }
 
@@ -92,16 +98,16 @@ btnJoin.addEventListener("click", async () => {
       players: firebase.firestore.FieldValue.arrayUnion(name)
     });
 
-    currentRoomId = roomId;
+    currentRoomId = roomName; // usiamo il nome come ID
     currentPlayerName = name;
     isHost = false;
 
     console.log("✅ Entrato nella stanza:", currentRoomId, "Giocatore:", currentPlayerName);
 
-    document.getElementById("roomTitle").innerText = `Stanza: ${roomId}`;
+    document.getElementById("roomTitle").innerText = `Stanza: ${roomName}`;
     showView(viewRoom);
 
-    subscribeToRoom(roomId);
+    subscribeToRoom(currentRoomId);
   } catch (err) {
     console.error("Errore ingresso stanza:", err);
     alert("Impossibile entrare nella stanza");
