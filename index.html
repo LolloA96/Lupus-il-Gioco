@@ -4,16 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lupus - Gioca con gli amici</title>
-  <!-- Favicon standard -->
-<link rel="icon" type="image/png" href="favicon.png" />
 
-<!-- Icona per iPhone/iPad -->
-<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png" />
 
-<!-- Opzionale: più dimensioni per diversi device -->
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png" />
-<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png" />
-<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png" />
   <link rel="stylesheet" href="style.css" />
 
   <!-- Firebase SDK -->
@@ -33,28 +31,24 @@
     <main class="container">
       
       <!-- HOME -->
-      <section id="viewHome" class="view card">
-        <h2>Benvenuto</h2>
-        <div class="card-sub">
-          <h3>Crea una partita</h3>
-          <label>Nome della stanza</label>
-          <input id="inputRoomNameCreate" type="text" placeholder="Es. Partita amici" />
+      <section id="viewHome" class="home-container">
+        <h1 class="home-title">Benvenuto,</h1>
+        <p class="home-subtitle">Inizia subito una partita</p>
 
-          <label>Il tuo nome</label>
-          <input id="inputNameCreate" type="text" placeholder="Es. Lorenzo" />
-
-          <button id="btnCreate" class="btn primary">Crea partita</button>
+        <!-- Crea una partita -->
+        <div class="home-card">
+          <h2 class="home-card-title">Crea una partita</h2>
+          <input type="text" id="inputRoomNameCreate" placeholder="Nome della stanza" />
+          <input type="text" id="inputNameCreate" placeholder="Il tuo nome" />
+          <button id="btnCreate" class="btn primary">Inizia la tua partita</button>
         </div>
 
-        <div class="card-sub">
-          <h3>Entra in una stanza</h3>
-          <label>Il tuo nome</label>
-          <input id="inputNameJoin" type="text" placeholder="Es. Giulia" />
-
-          <label>ID stanza</label>
-          <input id="inputRoomId" type="text" placeholder="Codice stanza" />
-
-          <button id="btnJoin" class="btn">Entra</button>
+        <!-- Entra in una stanza -->
+        <div class="home-card">
+          <h2 class="home-card-title">Entra in una stanza</h2>
+          <input type="text" id="inputRoomId" placeholder="Nome della stanza" />
+          <input type="text" id="inputNameJoin" placeholder="Il tuo nome" />
+          <button id="btnJoin" class="btn primary">Inizia la tua partita</button>
         </div>
       </section>
 
@@ -74,9 +68,11 @@
       </section>
 
       <!-- CARTA RUOLO -->
-<section id="viewRoleCard" class="view card hidden">
-  <!-- Qui JS inserirà dinamicamente il contenuto -->
-</section>
+      <section id="viewRoleCard" class="view card hidden">
+        <!-- JS inserirà il contenuto dinamicamente -->
+      </section>
+    </main>
+  </div>
 
   <!-- Config e logica -->
   <script src="./firebase-config.js"></script>
