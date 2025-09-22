@@ -1,4 +1,4 @@
-// app.js (Sostituisci tutto il file con questo contenuto)
+// app.js (versione aggiornata)
 
 let currentRoomId = null;
 let currentPlayerName = null;
@@ -30,8 +30,6 @@ function unsubscribeRoom() {
     roomUnsubscribe();
     roomUnsubscribe = null;
   }
-  // ❌ non cancellare subito la stanza
-  // currentRoomId = null;
   isHost = false;
 }
 
@@ -50,7 +48,7 @@ btnCreate.addEventListener("click", async () => {
       createdAt: Date.now(),
       roomName: roomName,
       players: [playerName],
-      host: playerName,     // <--- salviamo l'host sul documento
+      host: playerName,
       ended: false
     });
 
@@ -60,9 +58,8 @@ btnCreate.addEventListener("click", async () => {
 
     console.log("✅ Stanza creata:", currentRoomId, "Giocatore:", currentPlayerName);
 
-    document.getElementById(
-      "roomTitle"
-    ).innerText = `Stanza: ${roomName} (ID: ${currentRoomId})`;
+    document.getElementById("roomTitle").innerText =
+      `Stanza: ${roomName} (ID: ${currentRoomId})`;
 
     showView(viewRoom);
     subscribeToRoom(currentRoomId);
@@ -91,7 +88,6 @@ btnJoin.addEventListener("click", async () => {
       return;
     }
 
-    // aggiungi il giocatore
     await roomRef.update({
       players: firebase.firestore.FieldValue.arrayUnion(name)
     });
@@ -114,12 +110,10 @@ btnJoin.addEventListener("click", async () => {
 
 // --- ASCOLTA I GIOCATORI IN STANZA ---
 function subscribeToRoom(roomId) {
-  // prima disiscriviamo se avevamo già una subscription aperta
   unsubscribeRoom();
 
   roomUnsubscribe = db.collection("rooms").doc(roomId).onSnapshot(doc => {
     if (!doc.exists) {
-      // stanza cancellata — torna alla home
       alert("La stanza è stata chiusa.");
       unsubscribeRoom();
       showView(viewHome);
@@ -129,16 +123,13 @@ function subscribeToRoom(roomId) {
     const data = doc.data();
     if (!data) return;
 
-    // Se la partita è terminata, tornare alla home per tutti
     if (data.ended) {
-      // mostra messaggio e torna alla home
       alert("La partita è terminata.");
       unsubscribeRoom();
       showView(viewHome);
       return;
     }
 
-    // aggiorna lista giocatori
     playerList.innerHTML = "";
     (data.players || []).forEach(p => {
       const li = document.createElement("li");
@@ -146,20 +137,18 @@ function subscribeToRoom(roomId) {
       playerList.appendChild(li);
     });
 
-    // se ci sono assegnazioni e il player corrente c'è, mostra il suo ruolo
     if (data.assignments && currentPlayerName) {
       const myRoleId = data.assignments[currentPlayerName];
       if (myRoleId) showMyRoleById(myRoleId);
     }
 
-    // se il documento contiene host e corrisponde al currentPlayerName, setta isHost
     if (data.host && currentPlayerName) {
       isHost = (data.host === currentPlayerName);
     }
   });
 }
 
-// --- INIZIA PARTITA (solo host) ---
+// --- INIZIA PARTITA ---
 btnStartGame.addEventListener("click", () => {
   if (!isHost) {
     alert("Solo l'host può iniziare la partita");
@@ -240,20 +229,17 @@ function updateCount(roleId) {
   if (el) el.innerText = selectedCounts[roleId];
 }
 
-// --- ASSEGNA RUOLI AI GIOCATORI (sostituito) ---
+// --- ASSEGNA RUOLI ---
 document.getElementById("btnAssignRoles").addEventListener("click", async () => {
   try {
-    console.log("ℹ️ Tentativo di assegnare ruoli. currentRoomId:", currentRoomId);
     if (!currentRoomId) {
       alert("Room non impostata.");
       return;
     }
 
-    // prendi i giocatori dalla UI (lista aggiornata da subscribeToRoom)
     const players = Array.from(document.querySelectorAll("#playerList li")).map(li => li.textContent);
     const playersCount = players.length;
 
-    // calcola totale selezionato
     let totalSelected = 0;
     Object.values(selectedCounts).forEach(v => totalSelected += v);
 
@@ -266,28 +252,22 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
       return;
     }
 
-    // costruisci pool di roleId (ripeti roleId count volte)
     let pool = [];
     Object.keys(selectedCounts).forEach(roleId => {
       for (let i = 0; i < selectedCounts[roleId]; i++) pool.push(roleId);
     });
-
-    // mescola la pool
     pool = shuffleArray(pool);
 
-    // crea mapping player -> roleId
     const assignments = {};
     for (let i = 0; i < playersCount; i++) {
       assignments[players[i]] = pool[i];
     }
 
-    // salva su Firestore
     const roomRef = db.collection("rooms").doc(currentRoomId);
     await roomRef.update({ assignments });
 
     console.log("Assignments saved:", assignments);
 
-    // mostra subito il ruolo del giocatore corrente (se è nella stanza)
     const myRoleId = assignments[currentPlayerName];
     if (myRoleId) {
       showMyRoleById(myRoleId);
@@ -296,11 +276,10 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
     }
   } catch (err) {
     console.error("Errore assegnazione ruoli:", err);
-    alert("Errore durante l'assegnazione dei ruoli (controlla console).");
   }
 });
 
-// --- Mostra ruolo a partire da roleId (utility) ---
+// --- Mostra ruolo a partire da roleId ---
 function showMyRoleById(roleId) {
   const role = ROLES.find(r => r.id === roleId);
   if (!role) {
@@ -311,9 +290,8 @@ function showMyRoleById(roleId) {
   showMyRole(role);
 }
 
-// --- MOSTRA CARTA RUOLO (con layout personalizzato per ogni ruolo) ---
+// --- MOSTRA CARTA RUOLO ---
 function showMyRole(role) {
-  // role: oggetto {id,label,description,img}
   const roleCard = document.getElementById("viewRoleCard");
   roleCard.innerHTML = `
     <div id="roleCardInner" class="role-container role-${role.id}">
@@ -328,18 +306,30 @@ function showMyRole(role) {
       <div class="role-actions">
         <button id="btnEndGame" class="btn primary">Termina partita</button>
         <button id="btnCloseGame" class="btn">Chiudi partita</button>
+        ${role.id === "mitomane" ? `<button id="btnTransform" class="btn">Trasformati</button>` : ""}
       </div>
     </div>
+
+    <!-- Popup Mitomane -->
+    ${role.id === "mitomane" ? `
+    <div id="mitomanePopup" class="popup hidden">
+      <div class="popup-content">
+        <h3>Scegli il personaggio in cui trasformarti</h3>
+        <div id="popupRoles"></div>
+        <button id="btnClosePopup" class="btn">Chiudi</button>
+      </div>
+    </div>
+    ` : ""}
   `;
   showView(viewRoleCard);
 
-  // --- Toggle oscuramento cliccando la card ---
+  // Oscuramento card
   const cardInner = document.getElementById("roleCardInner");
   cardInner.addEventListener("click", () => {
     cardInner.classList.toggle("role-obscured");
   });
 
-  // listener: Termina partita
+  // Termina partita
   const endBtn = document.getElementById("btnEndGame");
   if (endBtn) {
     endBtn.addEventListener("click", async () => {
@@ -350,7 +340,6 @@ function showMyRole(role) {
         if (data.host && data.host !== currentPlayerName) {
           return alert("Solo l'host può terminare la partita per tutti.");
         }
-
         await db.collection("rooms").doc(currentRoomId).update({
           ended: true,
           endedAt: Date.now(),
@@ -362,57 +351,49 @@ function showMyRole(role) {
     });
   }
 
-  // listener: Chiudi partita
+  // Chiudi partita
   const closeBtn = document.getElementById("btnCloseGame");
   if (closeBtn) {
     closeBtn.addEventListener("click", () => {
       showView(viewHome);
     });
+  }
+
+  // Mitomane: gestione popup
+  if (role.id === "mitomane") {
+    const transformBtn = document.getElementById("btnTransform");
+    const popup = document.getElementById("mitomanePopup");
+    const popupRoles = document.getElementById("popupRoles");
+    const closePopup = document.getElementById("btnClosePopup");
+
+    if (transformBtn) {
+      transformBtn.addEventListener("click", () => {
+        popup.classList.remove("hidden");
+        popupRoles.innerHTML = "";
+
+        ROLES.filter(r => r.id !== "mitomane").forEach(r => {
+          const btn = document.createElement("button");
+          btn.className = "btn";
+          btn.innerText = r.label;
+          btn.addEventListener("click", () => {
+            popup.classList.add("hidden");
+            showMyRole(r);
+          });
+          popupRoles.appendChild(btn);
+        });
+      });
+    }
+
+    if (closePopup) {
+      closePopup.addEventListener("click", () => {
+        popup.classList.add("hidden");
+      });
+    }
   }
 }
 
-  // listener: Termina partita -> imposta ended:true (solo host)
-  const endBtn = document.getElementById("btnEndGame");
-  if (endBtn) {
-    endBtn.addEventListener("click", async () => {
-      if (!currentRoomId) return;
-      try {
-        // Controlliamo che il currentPlayerName sia host (sicurezza lato client)
-        const roomSnap = await db.collection("rooms").doc(currentRoomId).get();
-        const data = roomSnap.data() || {};
-        if (data.host && data.host !== currentPlayerName) {
-          return alert("Solo l'host può terminare la partita per tutti.");
-        }
-
-        await db.collection("rooms").doc(currentRoomId).update({
-          ended: true,
-          endedAt: Date.now(),
-          endedBy: currentPlayerName || null
-        });
-        // la subscription vedrà ended:true e tornerà alla home per tutti
-      } catch (err) {
-        console.error("Errore nel terminare la partita:", err);
-        alert("Errore nel terminare la partita (vedi console).");
-      }
-    });
-  }
-
-  // listener: Chiudi partita (solo UI -> torna alla home locale)
-  const closeBtn = document.getElementById("btnCloseGame");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-      // Se vuoi uscire solo tu, possiamo rimuovere il tuo nome dalla stanza
-      // per ora: torni solo alla home senza toccare DB
-      showView(viewHome);
-      // opzionale: se vuoi rimuovere il nome dalla stanza:
-      // db.collection("rooms").doc(currentRoomId).update({ players: firebase.firestore.FieldValue.arrayRemove(currentPlayerName) });
-    });
-  }
-
-
 // --- UTILITY: shuffle ---
 function shuffleArray(array) {
-  // Fisher-Yates
   const a = array.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

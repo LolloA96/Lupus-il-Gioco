@@ -164,3 +164,32 @@ body {
   padding: 8px 12px;
   border-radius: 8px;
 }
+
+/* Popup overlay */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-content {
+  background: #1b263b;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.popup-content h3 {
+  margin-bottom: 1rem;
+}
