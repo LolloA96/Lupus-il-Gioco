@@ -176,14 +176,57 @@ function updateCount(roleId) {
   document.getElementById(`count-${roleId}`).innerText = selectedCounts[roleId];
 }
 
-// --- ASSEGNA RUOLI AI GIOCATORI ---
-document.getElementById("btnAssignRoles").addEventListener("click", () => {
-  const allRoles = [];
-  Object.keys(selectedCounts).forEach(roleId => {
-    for (let i = 0; i < selectedCounts[roleId]; i++) {
-      allRoles.push(ROLES.find(r => r.id === roleId));
+// --- ASSEGNA RUOLI AI GIOCATORI (REPLACE) ---
+document.getElementById("btnAssignRoles").addEventListener("click", async () => {
+  try {
+    if (!currentRoomId) return alert("Room non impostata.");
+
+    // prendi i giocatori dalla UI (lista aggiornata da subscribeToRoom)
+    const players = Array.from(document.querySelectorAll("#playerList li")).map(li => li.textContent);
+    const playersCount = players.length;
+
+    // calcola totale selezionato
+    let totalSelected = 0;
+    Object.values(selectedCounts).forEach(v => totalSelected += v);
+
+    if (playersCount === 0) return alert("Non ci sono giocatori in stanza.");
+    if (totalSelected !== playersCount) {
+      return alert(`Devi scegliere esattamente ${playersCount} ruoli. Hai scelto ${totalSelected}.`);
     }
-  });
+
+    // costruisci pool di roleId (ripeti roleId count volte)
+    let pool = [];
+    Object.keys(selectedCounts).forEach(roleId => {
+      for (let i = 0; i < selectedCounts[roleId]; i++) pool.push(roleId);
+    });
+
+    // mescola la pool
+    pool = shuffleArray(pool);
+
+    // crea mapping player -> roleId
+    const assignments = {};
+    for (let i = 0; i < playersCount; i++) {
+      assignments[players[i]] = pool[i];
+    }
+
+    // salva su Firestore
+    const roomRef = db.collection("rooms").doc(currentRoomId);
+    await roomRef.update({ assignments });
+
+    console.log("Assignments saved:", assignments);
+
+    // mostra subito il ruolo del giocatore corrente (se è nella stanza)
+    const myRoleId = assignments[currentPlayerName];
+    if (myRoleId) {
+      showMyRoleById(myRoleId);
+    } else {
+      showView(viewRoom);
+    }
+  } catch (err) {
+    console.error("Errore assegnazione ruoli:", err);
+    alert("Errore durante l'assegnazione dei ruoli (controlla console).");
+  }
+});
 
   if (allRoles.length < playerList.childNodes.length) {
     return alert("Non hai selezionato abbastanza ruoli per tutti i giocatori!");
