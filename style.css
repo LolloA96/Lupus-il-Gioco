@@ -73,8 +73,8 @@ body {
 .roles-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 32px;
+  gap: 12px; /* spazio tra card */
+  margin-bottom: 32px; /* spazio dal bottone */
   align-items: center;
 }
 
@@ -85,7 +85,6 @@ body {
   text-align: center;
   color: #fff;
   font-weight: bold;
-  background: #1b263b;
 }
 
 .role-card img {
@@ -94,28 +93,19 @@ body {
   margin-bottom: 12px;
 }
 
-/* footer con nome + controlli */
-.role-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  background: rgba(255,255,255,0.1);
-  border-radius: 12px;
-  padding: 8px 12px;
-}
-
-.role-name {
-  font-size: 1rem;
+.role-card h3 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 1px;
   font-weight: bold;
-  color: #fff;
-  text-transform: uppercase;
 }
 
 .role-controls {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
+  margin-top: 12px;
 }
 
 .role-controls button {
@@ -134,7 +124,6 @@ body {
   font-size: 16px;
   font-weight: bold;
   min-width: 20px;
-  color: #fff;
 }
 
 /* --- STILE DETTAGLIO RUOLO (card singolo) --- */
@@ -145,4 +134,133 @@ body {
   padding: 1rem;
   border-radius: 16px;
   width: 90%;
-  margin:
+  margin: 0 auto;
+  background: #1b263b;
+}
+
+.role-header {
+  width: 100%;
+  text-align: center;
+  background: #1d3557;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  padding: 0.8rem;
+  border-radius: 12px 12px 0 0;
+}
+
+.role-image img {
+  width: 160px;
+  height: auto;
+  margin: 1rem 0;
+}
+
+.role-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: white;
+  margin: 0.5rem 0;
+  text-align: center;
+  background: rgba(0,0,0,0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.role-description {
+  width: 100%;
+  text-align: left;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.role-description p:first-child {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.role-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.role-actions .btn {
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 24px;
+  font-size: 1rem;
+}
+
+.role-actions .btn.primary {
+  background: #f4a261;
+  color: #fff;
+}
+
+.role-actions .btn:not(.primary) {
+  background: transparent;
+  border: 2px solid #f4a261;
+  color: #f4a261;
+}
+
+/* --- COLORI PER RUOLI SPECIFICI --- */
+.role-lupo { background: #3B5998; }
+.role-contadino { background: #8B2F2F; }
+.role-comandante { background: #B8860B; }
+.role-veggente { background: #B565A7; }
+.role-mitomane { background: #2E8B57; }
+.role-strega { background: #2F6B2F; }
+
+/* stato oscurato */
+.role-obscured {
+  filter: brightness(0.1) blur(4px);
+  color: transparent !important;
+  position: relative;
+}
+
+.role-obscured::after {
+  content: "OSCURA";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  font-size: 1.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+/* Popup overlay */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-content {
+  background: #1b263b;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  width: 80%;
+}
+
+.popup-content h3 {
+  margin-bottom: 1rem;
+}
