@@ -96,6 +96,13 @@ function subscribeToRoom(roomId) {
     const data = doc.data();
     if (!data) return;
 
+    // 👇 Se la partita è terminata → torna tutti alla home
+    if (data.ended) {
+      alert("La partita è terminata!");
+      showView(viewHome);
+      return;
+    }
+
     playerList.innerHTML = "";
     (data.players || []).forEach(p => {
       const li = document.createElement("li");
@@ -103,7 +110,7 @@ function subscribeToRoom(roomId) {
       playerList.appendChild(li);
     });
 
-    // Se ci sono assegnazioni salvate, e il player corrente è presente, mostra il suo ruolo
+    // Se ci sono assegnazioni salvate, mostra subito il ruolo del player
     if (data.assignments && currentPlayerName) {
       const myRoleId = data.assignments[currentPlayerName];
       if (myRoleId) showMyRoleById(myRoleId);
@@ -262,7 +269,6 @@ function showMyRoleById(roleId) {
   showMyRole(role);
 }
 
-// --- MOSTRA CARTA RUOLO (con layout personalizzato per ogni ruolo) ---
 function showMyRole(role) {
   // role: oggetto {id,label,description,img}
   const roleCard = document.getElementById("viewRoleCard");
@@ -283,8 +289,23 @@ function showMyRole(role) {
     </div>
   `;
   showView(viewRoleCard);
-}
 
+  // 👇 qui aggiungiamo i listener
+  document.getElementById("btnEndGame").addEventListener("click", async () => {
+    if (!currentRoomId) return;
+    try {
+      await db.collection("rooms").doc(currentRoomId).update({
+        ended: true
+      });
+    } catch (err) {
+      console.error("Errore nel terminare la partita:", err);
+    }
+  });
+
+  document.getElementById("btnCloseGame").addEventListener("click", () => {
+    showView(viewHome);
+  });
+}
 // --- UTILITY: shuffle ---
 function shuffleArray(array) {
   // Fisher-Yates
