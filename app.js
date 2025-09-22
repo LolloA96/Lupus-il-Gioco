@@ -1,4 +1,4 @@
-// app.js (versione aggiornata con roomName come ID)
+// app.js (versione aggiornata con roomName come ID e gestione host/player list)
 
 let currentRoomId = null;
 let currentPlayerName = null;
@@ -136,13 +136,45 @@ function subscribeToRoom(roomId) {
       return;
     }
 
+    // 🔹 Rendering lista giocatori
     playerList.innerHTML = "";
     (data.players || []).forEach(p => {
       const li = document.createElement("li");
-      li.textContent = p;
+
+      // avatar con iniziali
+      const avatar = document.createElement("div");
+      avatar.className = "player-avatar";
+      const initials = p.split(" ").map(w => w[0].toUpperCase()).join("").slice(0, 2);
+      avatar.textContent = initials;
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "player-name";
+      nameSpan.textContent = p;
+
+      li.appendChild(avatar);
+      li.appendChild(nameSpan);
+
+      // se sono host → pulsante rimuovi
+      if (isHost && p !== currentPlayerName) {
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-player";
+        removeBtn.innerHTML = "🗑️";
+        removeBtn.addEventListener("click", async () => {
+          try {
+            await db.collection("rooms").doc(currentRoomId).update({
+              players: firebase.firestore.FieldValue.arrayRemove(p)
+            });
+          } catch (err) {
+            console.error("Errore nel rimuovere il giocatore:", err);
+          }
+        });
+        li.appendChild(removeBtn);
+      }
+
       playerList.appendChild(li);
     });
 
+    // 🔹 Controllo ruoli e host
     if (data.assignments && currentPlayerName) {
       const myRoleId = data.assignments[currentPlayerName];
       if (myRoleId) showMyRoleById(myRoleId);
