@@ -58,6 +58,8 @@ btnCreate.addEventListener("click", async () => {
     currentPlayerName = playerName;
     isHost = true;
 
+    console.log("✅ Stanza creata:", currentRoomId, "Giocatore:", currentPlayerName);
+
     document.getElementById(
       "roomTitle"
     ).innerText = `Stanza: ${roomName} (ID: ${currentRoomId})`;
@@ -97,6 +99,8 @@ btnJoin.addEventListener("click", async () => {
     currentRoomId = roomId;
     currentPlayerName = name;
     isHost = false;
+
+    console.log("✅ Entrato nella stanza:", currentRoomId, "Giocatore:", currentPlayerName);
 
     document.getElementById("roomTitle").innerText = `Stanza: ${roomId}`;
     showView(viewRoom);
@@ -239,6 +243,7 @@ function updateCount(roleId) {
 // --- ASSEGNA RUOLI AI GIOCATORI (sostituito) ---
 document.getElementById("btnAssignRoles").addEventListener("click", async () => {
   try {
+    console.log("ℹ️ Tentativo di assegnare ruoli. currentRoomId:", currentRoomId);
     if (!currentRoomId) {
       alert("Room non impostata.");
       return;
