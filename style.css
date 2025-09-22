@@ -78,52 +78,82 @@ body {
   align-items: center;
 }
 
+/* --- SCHERMATA PERSONAGGI (lista scelta) --- */
+#viewRoles {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+#viewRoles h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+#viewRoles p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 24px;
+}
+
+.roles-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* spazio tra card */
+  margin-bottom: 32px; /* spazio dal bottone */
+  align-items: center;
+}
+
 .role-card {
   width: 90%;
   border-radius: 12px;
   padding: 16px;
   text-align: center;
-  color: #fff;
   font-weight: bold;
+  color: #fff;
 }
 
 .role-card img {
-  width: 120px;
+  width: 140px;
   height: auto;
-  margin-bottom: 12px;
+  margin: 0 auto 12px auto;
+  display: block;
 }
 
-.role-card h3 {
-  margin: 0;
+.role-name {
+  display: block;
+  margin-top: 8px;
   font-size: 18px;
-  letter-spacing: 1px;
   font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .role-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   margin-top: 12px;
 }
 
 .role-controls button {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   background: #fff;
   color: #000;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
   font-weight: bold;
 }
 
 .role-controls span {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
-  min-width: 20px;
+  min-width: 24px;
+  text-align: center;
 }
 
 /* --- STILE DETTAGLIO RUOLO (card singolo) --- */

@@ -177,7 +177,7 @@ const ROLES = [
 const selectedCounts = {};
 ROLES.forEach(r => selectedCounts[r.id] = 0);
 
-// --- RENDER CARD RUOLI ---
+// --- RENDER CARD RUOLI (aggiornato per replicare design) ---
 function renderRolesUI() {
   const container = document.getElementById("rolesContainer");
   if (!container) return;
@@ -185,21 +185,21 @@ function renderRolesUI() {
 
   ROLES.forEach(role => {
     const card = document.createElement("div");
-    card.className = "role-card";
+    card.className = `role-card role-${role.id}`;
 
+    // immagine
     const img = document.createElement("img");
     img.src = role.img;
     img.alt = role.label;
     card.appendChild(img);
 
-    // Footer → nome + controlli
-    const footer = document.createElement("div");
-    footer.className = "role-footer";
-
+    // nome
     const name = document.createElement("span");
     name.className = "role-name";
-    name.innerText = role.label;
+    name.innerText = role.label.toUpperCase();
+    card.appendChild(name);
 
+    // controlli
     const controls = document.createElement("div");
     controls.className = "role-controls";
 
@@ -229,10 +229,7 @@ function renderRolesUI() {
     controls.appendChild(count);
     controls.appendChild(plus);
 
-    footer.appendChild(name);
-    footer.appendChild(controls);
-
-    card.appendChild(footer);
+    card.appendChild(controls);
     container.appendChild(card);
   });
 }
