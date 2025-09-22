@@ -1,6 +1,9 @@
+// app.js (Sostituisci tutto il file con questo contenuto)
+
 let currentRoomId = null;
 let currentPlayerName = null;
 let isHost = false;
+let roomUnsubscribe = null; // per tenere il riferimento alla subscription
 
 // ELEMENTI DOM
 const viewHome = document.getElementById("viewHome");
@@ -21,6 +24,17 @@ function showView(view) {
   view.classList.remove("hidden");
 }
 
+// helper per disiscrivere onSnapshot (se attiva)
+function unsubscribeRoom() {
+  if (typeof roomUnsubscribe === "function") {
+    roomUnsubscribe();
+    roomUnsubscribe = null;
+  }
+  currentRoomId = null;
+  isHost = false;
+  // non azzeriamo currentPlayerName: serve se si vuole rientrare
+}
+
 // --- CREA STANZA ---
 btnCreate.addEventListener("click", async () => {
   const roomName = document.getElementById("inputRoomNameCreate").value.trim();
@@ -35,7 +49,9 @@ btnCreate.addEventListener("click", async () => {
     const roomRef = await db.collection("rooms").add({
       createdAt: Date.now(),
       roomName: roomName,
-      players: [playerName]
+      players: [playerName],
+      host: playerName,     // <--- salviamo l'host sul documento
+      ended: false
     });
 
     currentRoomId = roomRef.id;
@@ -73,12 +89,14 @@ btnJoin.addEventListener("click", async () => {
       return;
     }
 
+    // aggiungi il giocatore
     await roomRef.update({
       players: firebase.firestore.FieldValue.arrayUnion(name)
     });
 
     currentRoomId = roomId;
     currentPlayerName = name;
+    isHost = false;
 
     document.getElementById("roomTitle").innerText = `Stanza: ${roomId}`;
     showView(viewRoom);
@@ -92,17 +110,31 @@ btnJoin.addEventListener("click", async () => {
 
 // --- ASCOLTA I GIOCATORI IN STANZA ---
 function subscribeToRoom(roomId) {
-  db.collection("rooms").doc(roomId).onSnapshot(doc => {
-    const data = doc.data();
-    if (!data) return;
+  // prima disiscriviamo se avevamo già una subscription aperta
+  unsubscribeRoom();
 
-    // 👇 Se la partita è terminata → torna tutti alla home
-    if (data.ended) {
-      alert("La partita è terminata!");
+  roomUnsubscribe = db.collection("rooms").doc(roomId).onSnapshot(doc => {
+    if (!doc.exists) {
+      // stanza cancellata — torna alla home
+      alert("La stanza è stata chiusa.");
+      unsubscribeRoom();
       showView(viewHome);
       return;
     }
 
+    const data = doc.data();
+    if (!data) return;
+
+    // Se la partita è terminata, tornare alla home per tutti
+    if (data.ended) {
+      // mostra messaggio e torna alla home
+      alert("La partita è terminata.");
+      unsubscribeRoom();
+      showView(viewHome);
+      return;
+    }
+
+    // aggiorna lista giocatori
     playerList.innerHTML = "";
     (data.players || []).forEach(p => {
       const li = document.createElement("li");
@@ -110,10 +142,15 @@ function subscribeToRoom(roomId) {
       playerList.appendChild(li);
     });
 
-    // Se ci sono assegnazioni salvate, mostra subito il ruolo del player
+    // se ci sono assegnazioni e il player corrente c'è, mostra il suo ruolo
     if (data.assignments && currentPlayerName) {
       const myRoleId = data.assignments[currentPlayerName];
       if (myRoleId) showMyRoleById(myRoleId);
+    }
+
+    // se il documento contiene host e corrisponde al currentPlayerName, setta isHost
+    if (data.host && currentPlayerName) {
+      isHost = (data.host === currentPlayerName);
     }
   });
 }
@@ -269,6 +306,7 @@ function showMyRoleById(roleId) {
   showMyRole(role);
 }
 
+// --- MOSTRA CARTA RUOLO (con layout personalizzato per ogni ruolo) ---
 function showMyRole(role) {
   // role: oggetto {id,label,description,img}
   const roleCard = document.getElementById("viewRoleCard");
@@ -290,22 +328,45 @@ function showMyRole(role) {
   `;
   showView(viewRoleCard);
 
-  // 👇 qui aggiungiamo i listener
-  document.getElementById("btnEndGame").addEventListener("click", async () => {
-    if (!currentRoomId) return;
-    try {
-      await db.collection("rooms").doc(currentRoomId).update({
-        ended: true
-      });
-    } catch (err) {
-      console.error("Errore nel terminare la partita:", err);
-    }
-  });
+  // listener: Termina partita -> imposta ended:true (solo host)
+  const endBtn = document.getElementById("btnEndGame");
+  if (endBtn) {
+    endBtn.addEventListener("click", async () => {
+      if (!currentRoomId) return;
+      try {
+        // Controlliamo che il currentPlayerName sia host (sicurezza lato client)
+        const roomSnap = await db.collection("rooms").doc(currentRoomId).get();
+        const data = roomSnap.data() || {};
+        if (data.host && data.host !== currentPlayerName) {
+          return alert("Solo l'host può terminare la partita per tutti.");
+        }
 
-  document.getElementById("btnCloseGame").addEventListener("click", () => {
-    showView(viewHome);
-  });
+        await db.collection("rooms").doc(currentRoomId).update({
+          ended: true,
+          endedAt: Date.now(),
+          endedBy: currentPlayerName || null
+        });
+        // la subscription vedrà ended:true e tornerà alla home per tutti
+      } catch (err) {
+        console.error("Errore nel terminare la partita:", err);
+        alert("Errore nel terminare la partita (vedi console).");
+      }
+    });
+  }
+
+  // listener: Chiudi partita (solo UI -> torna alla home locale)
+  const closeBtn = document.getElementById("btnCloseGame");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      // Se vuoi uscire solo tu, possiamo rimuovere il tuo nome dalla stanza
+      // per ora: torni solo alla home senza toccare DB
+      showView(viewHome);
+      // opzionale: se vuoi rimuovere il nome dalla stanza:
+      // db.collection("rooms").doc(currentRoomId).update({ players: firebase.firestore.FieldValue.arrayRemove(currentPlayerName) });
+    });
+  }
 }
+
 // --- UTILITY: shuffle ---
 function shuffleArray(array) {
   // Fisher-Yates
