@@ -3,7 +3,7 @@
 let currentRoomId = null;
 let currentPlayerName = null;
 let isHost = false;
-let roomUnsubscribe = null; // per tenere il riferimento alla subscription
+let roomUnsubscribe = null;
 
 // ELEMENTI DOM
 const viewHome = document.getElementById("viewHome");
@@ -24,7 +24,7 @@ function showView(view) {
   view.classList.remove("hidden");
 }
 
-// helper per disiscrivere onSnapshot (se attiva)
+// helper per disiscrivere onSnapshot
 function unsubscribeRoom() {
   if (typeof roomUnsubscribe === "function") {
     roomUnsubscribe();
@@ -164,8 +164,8 @@ const ROLES = [
   { id: "contadino", label: "Contadino", description: "Il tuo ruolo è quello di scovare tutti i lupi all’interno del villaggio!", img: "img/contadino.png" },
   { id: "comandante", label: "Comandante", description: "Il tuo ruolo è quello di proteggere una persona a tua scelta ogni notte. Puoi salvare anche te stesso per una notte.", img: "img/comandante.png" },
   { id: "veggente", label: "Veggente", description: "Il tuo ruolo è quello di scoprire i lupi per poi aiutare il villaggio ad ucciderlo.", img: "img/veggente.png" },
-  { id: "mitomane", label: "Mitomane", description: "Il tuo ruolo è quello di indicare un giocatore a sua scelta e ne prende i poteri (il potere vale solo ad inizio partita).", img: "img/mitomane.png" },
-  { id: "strega", label: "Strega", description: "Il tuo ruolo è quello di scoprire chi è il lupo e resuscitare una persona (i poteri potranno essere usati dalla seconda notte).", img: "img/strega.png" }
+  { id: "mitomane", label: "Mitomane", description: "Il tuo ruolo è quello di indicare un giocatore a sua scelta e ne prende i poteri (il potere vale solo ad inizio partita).", img: "img/mitomane.png" },
+  { id: "strega", label: "Strega", description: "Il tuo ruolo è quello di scoprire chi è il lupo e resuscitare una persona (i poteri potranno essere usati dalla seconda notte).", img: "img/strega.png" }
 ];
 
 const selectedCounts = {};
@@ -186,9 +186,13 @@ function renderRolesUI() {
     img.alt = role.label;
     card.appendChild(img);
 
-    const name = document.createElement("h3");
+    // Footer → nome + controlli
+    const footer = document.createElement("div");
+    footer.className = "role-footer";
+
+    const name = document.createElement("span");
+    name.className = "role-name";
     name.innerText = role.label;
-    card.appendChild(name);
 
     const controls = document.createElement("div");
     controls.className = "role-controls";
@@ -219,7 +223,10 @@ function renderRolesUI() {
     controls.appendChild(count);
     controls.appendChild(plus);
 
-    card.appendChild(controls);
+    footer.appendChild(name);
+    footer.appendChild(controls);
+
+    card.appendChild(footer);
     container.appendChild(card);
   });
 }
@@ -279,7 +286,7 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
   }
 });
 
-// --- Mostra ruolo a partire da roleId ---
+// --- Mostra ruolo ---
 function showMyRoleById(roleId) {
   const role = ROLES.find(r => r.id === roleId);
   if (!role) {
@@ -293,74 +300,34 @@ function showMyRoleById(roleId) {
 // --- MOSTRA CARTA RUOLO ---
 function showMyRole(role) {
   const roleCard = document.getElementById("viewRoleCard");
-  roleCard.innerHTML = `
-    <div id="roleCardInner" class="role-container role-${role.id}">
-      <div class="role-header">LUPUS</div>
-      <div class="role-image">
-        <img src="${role.img}" alt="${role.label}" />
-      </div>
-      <h2 class="role-title">${role.label.toUpperCase()}</h2>
-      <div class="role-description">
-        <p>${role.description}</p>
-      </div>
-      <div class="role-actions">
-        <button id="btnEndGame" class="btn primary">Termina partita</button>
-        <button id="btnCloseGame" class="btn">Chiudi partita</button>
-        ${role.id === "mitomane" ? `<button id="btnTransform" class="btn">Trasformati</button>` : ""}
-      </div>
-    </div>
 
-    <!-- Popup Mitomane -->
-    ${role.id === "mitomane" ? `
-    <div id="mitomanePopup" class="popup hidden">
-      <div class="popup-content">
-        <h3>Scegli il personaggio in cui trasformarti</h3>
-        <div id="popupRoles"></div>
-        <button id="btnClosePopup" class="btn">Chiudi</button>
-      </div>
-    </div>
-    ` : ""}
-  `;
-  showView(viewRoleCard);
-
-  // Oscuramento card
-  const cardInner = document.getElementById("roleCardInner");
-  cardInner.addEventListener("click", () => {
-    cardInner.classList.toggle("role-obscured");
-  });
-
-  // Termina partita
-  const endBtn = document.getElementById("btnEndGame");
-  if (endBtn) {
-    endBtn.addEventListener("click", async () => {
-      if (!currentRoomId) return;
-      try {
-        const roomSnap = await db.collection("rooms").doc(currentRoomId).get();
-        const data = roomSnap.data() || {};
-        if (data.host && data.host !== currentPlayerName) {
-          return alert("Solo l'host può terminare la partita per tutti.");
-        }
-        await db.collection("rooms").doc(currentRoomId).update({
-          ended: true,
-          endedAt: Date.now(),
-          endedBy: currentPlayerName || null
-        });
-      } catch (err) {
-        console.error("Errore nel terminare la partita:", err);
-      }
-    });
-  }
-
-  // Chiudi partita
-  const closeBtn = document.getElementById("btnCloseGame");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-      showView(viewHome);
-    });
-  }
-
-  // Mitomane: gestione popup
+  // Mitomane → solo Trasformati
   if (role.id === "mitomane") {
+    roleCard.innerHTML = `
+      <div id="roleCardInner" class="role-container role-${role.id}">
+        <div class="role-header">LUPUS</div>
+        <div class="role-image">
+          <img src="${role.img}" alt="${role.label}" />
+        </div>
+        <h2 class="role-title">${role.label.toUpperCase()}</h2>
+        <div class="role-description">
+          <p>${role.description}</p>
+        </div>
+        <div class="role-actions">
+          <button id="btnTransform" class="btn primary">Trasformati</button>
+        </div>
+      </div>
+
+      <div id="mitomanePopup" class="popup hidden">
+        <div class="popup-content">
+          <h3>Scegli il personaggio in cui trasformarti</h3>
+          <div id="popupRoles"></div>
+          <button id="btnClosePopup" class="btn">Chiudi</button>
+        </div>
+      </div>
+    `;
+    showView(viewRoleCard);
+
     const transformBtn = document.getElementById("btnTransform");
     const popup = document.getElementById("mitomanePopup");
     const popupRoles = document.getElementById("popupRoles");
@@ -389,6 +356,60 @@ function showMyRole(role) {
         popup.classList.add("hidden");
       });
     }
+
+    return;
+  }
+
+  // --- Ruoli normali ---
+  roleCard.innerHTML = `
+    <div id="roleCardInner" class="role-container role-${role.id}">
+      <div class="role-header">LUPUS</div>
+      <div class="role-image">
+        <img src="${role.img}" alt="${role.label}" />
+      </div>
+      <h2 class="role-title">${role.label.toUpperCase()}</h2>
+      <div class="role-description">
+        <p>${role.description}</p>
+      </div>
+      <div class="role-actions">
+        <button id="btnEndGame" class="btn primary">Termina partita</button>
+        <button id="btnCloseGame" class="btn">Chiudi partita</button>
+      </div>
+    </div>
+  `;
+  showView(viewRoleCard);
+
+  const cardInner = document.getElementById("roleCardInner");
+  cardInner.addEventListener("click", () => {
+    cardInner.classList.toggle("role-obscured");
+  });
+
+  const endBtn = document.getElementById("btnEndGame");
+  if (endBtn) {
+    endBtn.addEventListener("click", async () => {
+      if (!currentRoomId) return;
+      try {
+        const roomSnap = await db.collection("rooms").doc(currentRoomId).get();
+        const data = roomSnap.data() || {};
+        if (data.host && data.host !== currentPlayerName) {
+          return alert("Solo l'host può terminare la partita per tutti.");
+        }
+        await db.collection("rooms").doc(currentRoomId).update({
+          ended: true,
+          endedAt: Date.now(),
+          endedBy: currentPlayerName || null
+        });
+      } catch (err) {
+        console.error("Errore nel terminare la partita:", err);
+      }
+    });
+  }
+
+  const closeBtn = document.getElementById("btnCloseGame");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      showView(viewHome);
+    });
   }
 }
 
