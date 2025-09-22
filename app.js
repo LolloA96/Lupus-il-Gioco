@@ -27,7 +27,8 @@ btnCreate.addEventListener("click", async () => {
   const playerName = document.getElementById("inputNameCreate").value.trim();
 
   if (!roomName || !playerName) {
-    return alert("Inserisci sia il nome della stanza che il tuo nome!");
+    alert("Inserisci sia il nome della stanza che il tuo nome!");
+    return;
   }
 
   try {
@@ -59,7 +60,8 @@ btnJoin.addEventListener("click", async () => {
   const roomId = document.getElementById("inputRoomId").value.trim();
 
   if (!name || !roomId) {
-    return alert("Inserisci nome e ID stanza!");
+    alert("Inserisci nome e ID stanza!");
+    return;
   }
 
   try {
@@ -67,7 +69,8 @@ btnJoin.addEventListener("click", async () => {
     const roomDoc = await roomRef.get();
 
     if (!roomDoc.exists) {
-      return alert("Stanza non trovata");
+      alert("Stanza non trovata");
+      return;
     }
 
     await roomRef.update({
@@ -94,17 +97,26 @@ function subscribeToRoom(roomId) {
     if (!data) return;
 
     playerList.innerHTML = "";
-    data.players.forEach(p => {
+    (data.players || []).forEach(p => {
       const li = document.createElement("li");
       li.textContent = p;
       playerList.appendChild(li);
     });
+
+    // Se ci sono assegnazioni salvate, e il player corrente è presente, mostra il suo ruolo
+    if (data.assignments && currentPlayerName) {
+      const myRoleId = data.assignments[currentPlayerName];
+      if (myRoleId) showMyRoleById(myRoleId);
+    }
   });
 }
 
 // --- INIZIA PARTITA (solo host) ---
 btnStartGame.addEventListener("click", () => {
-  if (!isHost) return alert("Solo l'host può iniziare la partita");
+  if (!isHost) {
+    alert("Solo l'host può iniziare la partita");
+    return;
+  }
   renderRolesUI();
   showView(viewRoles);
 });
@@ -125,6 +137,7 @@ ROLES.forEach(r => selectedCounts[r.id] = 0);
 // --- RENDER CARD RUOLI ---
 function renderRolesUI() {
   const container = document.getElementById("rolesContainer");
+  if (!container) return;
   container.innerHTML = "";
 
   ROLES.forEach(role => {
@@ -144,6 +157,7 @@ function renderRolesUI() {
     controls.className = "role-controls";
 
     const minus = document.createElement("button");
+    minus.type = "button";
     minus.innerText = "−";
     minus.onclick = () => {
       if (selectedCounts[role.id] > 0) {
@@ -157,6 +171,7 @@ function renderRolesUI() {
     count.innerText = selectedCounts[role.id];
 
     const plus = document.createElement("button");
+    plus.type = "button";
     plus.innerText = "+";
     plus.onclick = () => {
       selectedCounts[role.id]++;
@@ -173,13 +188,17 @@ function renderRolesUI() {
 }
 
 function updateCount(roleId) {
-  document.getElementById(`count-${roleId}`).innerText = selectedCounts[roleId];
+  const el = document.getElementById(`count-${roleId}`);
+  if (el) el.innerText = selectedCounts[roleId];
 }
 
-// --- ASSEGNA RUOLI AI GIOCATORI (REPLACE) ---
+// --- ASSEGNA RUOLI AI GIOCATORI (sostituito) ---
 document.getElementById("btnAssignRoles").addEventListener("click", async () => {
   try {
-    if (!currentRoomId) return alert("Room non impostata.");
+    if (!currentRoomId) {
+      alert("Room non impostata.");
+      return;
+    }
 
     // prendi i giocatori dalla UI (lista aggiornata da subscribeToRoom)
     const players = Array.from(document.querySelectorAll("#playerList li")).map(li => li.textContent);
@@ -189,9 +208,13 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
     let totalSelected = 0;
     Object.values(selectedCounts).forEach(v => totalSelected += v);
 
-    if (playersCount === 0) return alert("Non ci sono giocatori in stanza.");
+    if (playersCount === 0) {
+      alert("Non ci sono giocatori in stanza.");
+      return;
+    }
     if (totalSelected !== playersCount) {
-      return alert(`Devi scegliere esattamente ${playersCount} ruoli. Hai scelto ${totalSelected}.`);
+      alert(`Devi scegliere esattamente ${playersCount} ruoli. Hai scelto ${totalSelected}.`);
+      return;
     }
 
     // costruisci pool di roleId (ripeti roleId count volte)
@@ -228,27 +251,28 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
   }
 });
 
-  if (allRoles.length < playerList.childNodes.length) {
-    return alert("Non hai selezionato abbastanza ruoli per tutti i giocatori!");
+// --- Mostra ruolo a partire da roleId (utility) ---
+function showMyRoleById(roleId) {
+  const role = ROLES.find(r => r.id === roleId);
+  if (!role) {
+    console.warn("Role not found:", roleId);
+    showView(viewRoom);
+    return;
   }
-
-  db.collection("rooms").doc(currentRoomId).update({
-    assignedRoles: shuffleArray(allRoles).slice(0, playerList.childNodes.length)
-  });
-
-  showView(viewRoleCard);
-});
+  showMyRole(role);
+}
 
 // --- MOSTRA CARTA RUOLO (con layout personalizzato per ogni ruolo) ---
 function showMyRole(role) {
+  // role: oggetto {id,label,description,img}
   const roleCard = document.getElementById("viewRoleCard");
   roleCard.innerHTML = `
-    <div class="role-container role-${role.name.toLowerCase()}">
+    <div class="role-container role-${role.id}">
       <div class="role-header">LUPUS</div>
       <div class="role-image">
-        <img src="./img/${role.name.toLowerCase()}.png" alt="${role.name}" />
+        <img src="${role.img}" alt="${role.label}" />
       </div>
-      <h2 class="role-title">${role.name.toUpperCase()}</h2>
+      <h2 class="role-title">${role.label.toUpperCase()}</h2>
       <div class="role-description">
         <p>${role.description}</p>
       </div>
@@ -258,9 +282,16 @@ function showMyRole(role) {
       </div>
     </div>
   `;
-  showView(roleCard);
+  showView(viewRoleCard);
 }
+
 // --- UTILITY: shuffle ---
 function shuffleArray(array) {
-  return array.sort(() => Math.random() - 0.5);
+  // Fisher-Yates
+  const a = array.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
