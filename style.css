@@ -142,3 +142,25 @@ body {
 .role-guardia {
   background: #457b9d;
 }
+
+/* stato oscurato */
+.role-obscured {
+  filter: brightness(0.1) blur(4px); /* scurisce e sfoca */
+  color: transparent !important;     /* nasconde i testi */
+  position: relative;
+}
+
+/* testo "Oscurato" sopra */
+.role-obscured::after {
+  content: "OSCURA";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  font-size: 1.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 12px;
+  border-radius: 8px;
+}

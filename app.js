@@ -316,7 +316,7 @@ function showMyRole(role) {
   // role: oggetto {id,label,description,img}
   const roleCard = document.getElementById("viewRoleCard");
   roleCard.innerHTML = `
-    <div class="role-container role-${role.id}">
+    <div id="roleCardInner" class="role-container role-${role.id}">
       <div class="role-header">LUPUS</div>
       <div class="role-image">
         <img src="${role.img}" alt="${role.label}" />
@@ -332,6 +332,44 @@ function showMyRole(role) {
     </div>
   `;
   showView(viewRoleCard);
+
+  // --- Toggle oscuramento cliccando la card ---
+  const cardInner = document.getElementById("roleCardInner");
+  cardInner.addEventListener("click", () => {
+    cardInner.classList.toggle("role-obscured");
+  });
+
+  // listener: Termina partita
+  const endBtn = document.getElementById("btnEndGame");
+  if (endBtn) {
+    endBtn.addEventListener("click", async () => {
+      if (!currentRoomId) return;
+      try {
+        const roomSnap = await db.collection("rooms").doc(currentRoomId).get();
+        const data = roomSnap.data() || {};
+        if (data.host && data.host !== currentPlayerName) {
+          return alert("Solo l'host può terminare la partita per tutti.");
+        }
+
+        await db.collection("rooms").doc(currentRoomId).update({
+          ended: true,
+          endedAt: Date.now(),
+          endedBy: currentPlayerName || null
+        });
+      } catch (err) {
+        console.error("Errore nel terminare la partita:", err);
+      }
+    });
+  }
+
+  // listener: Chiudi partita
+  const closeBtn = document.getElementById("btnCloseGame");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      showView(viewHome);
+    });
+  }
+}
 
   // listener: Termina partita -> imposta ended:true (solo host)
   const endBtn = document.getElementById("btnEndGame");
@@ -370,7 +408,7 @@ function showMyRole(role) {
       // db.collection("rooms").doc(currentRoomId).update({ players: firebase.firestore.FieldValue.arrayRemove(currentPlayerName) });
     });
   }
-}
+
 
 // --- UTILITY: shuffle ---
 function shuffleArray(array) {
