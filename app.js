@@ -30,9 +30,9 @@ function unsubscribeRoom() {
     roomUnsubscribe();
     roomUnsubscribe = null;
   }
-  currentRoomId = null;
+  // ❌ non cancellare subito la stanza
+  // currentRoomId = null;
   isHost = false;
-  // non azzeriamo currentPlayerName: serve se si vuole rientrare
 }
 
 // --- CREA STANZA ---
