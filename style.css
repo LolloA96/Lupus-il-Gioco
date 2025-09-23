@@ -62,7 +62,7 @@ body {
   max-width: 420px;
   margin: 0 auto;
 }
-.home-title { font-size: 1.8rem; font-weight: bold; color: #fff; margin-bottom: 6px; }
+.home-title { font-size: 1.8rem; font-weight: bold; color: #fff; margin-bottom: 6px; margin-top: 50px; }
 .home-subtitle { font-size: 1rem; color: #d1d5db; margin-bottom: 18px; }
 
 .home-card {
