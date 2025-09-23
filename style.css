@@ -1,3 +1,4 @@
+/* base */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -5,21 +6,39 @@ body {
   color: #fff;
 }
 
-.topbar {
-  background: #1b263b;
-  padding: 1rem;
-  text-align: center;
-}
-
-.brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
 .container {
   padding: 1rem;
 }
 
+/* ...existing code... */
+
+/* header / logo */
+.app-header {
+  background-color: #243c84;
+  padding: 18px 0;
+  text-align: center;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.logo-header {
+  height: 40px;
+  display: inline-block;
+  margin: 0 auto;
+}
+
+/* Spazio sotto l'header per evitare che il contenuto venga coperto */
+body {
+  margin-top: 76px; /* uguale o maggiore dell'altezza dell'header */
+}
+
+/* ...existing code... */
+
+/* generic card */
 .card {
   background: #1b263b;
   border-radius: 12px;
@@ -27,10 +46,11 @@ body {
   margin-bottom: 1rem;
 }
 
-.card-sub {
-  margin-top: 1rem;
+.hidden {
+  display: none;
 }
 
+/* buttons */
 .btn {
   display: block;
   margin-top: 0.5rem;
@@ -41,295 +61,29 @@ body {
   font-weight: bold;
   font-size: 1rem;
 }
-
 .btn.primary {
   background: #f4a261;
   color: #fff;
 }
 
-.hidden {
-  display: none;
-}
-
-/* --- SCHERMATA PERSONAGGI (lista scelta) --- */
-#viewRoles {
-  text-align: center;
-  padding: 24px 16px;
-}
-
-#viewRoles h2 {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 4px;
-  color: #fff;
-}
-
-#viewRoles p {
-  font-size: 14px;
-  color: rgba(255,255,255,0.8);
-  margin-bottom: 24px;
-}
-
-.roles-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 32px;
-  align-items: center;
-}
-
-/* --- SCHERMATA PERSONAGGI (lista scelta) --- */
-#viewRoles {
-  text-align: center;
-  padding: 24px 16px;
-}
-
-#viewRoles h2 {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 4px;
-  color: #fff;
-}
-
-#viewRoles p {
-  font-size: 14px;
-  color: rgba(255,255,255,0.8);
-  margin-bottom: 24px;
-}
-
-.roles-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* spazio tra card */
-  margin-bottom: 32px; /* spazio dal bottone */
-  align-items: center;
-}
-
-.role-card {
-  width: 90%;
-  border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-  font-weight: bold;
-  color: #fff;
-}
-
-.role-card img {
-  width: 140px;
-  height: auto;
-  margin: 0 auto 12px auto;
-  display: block;
-}
-
-.role-name {
-  display: block;
-  margin-top: 8px;
-  font-size: 18px;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.role-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.role-controls button {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: #fff;
-  color: #000;
-  font-size: 20px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.role-controls span {
-  font-size: 18px;
-  font-weight: bold;
-  min-width: 24px;
-  text-align: center;
-}
-
-/* --- STILE DETTAGLIO RUOLO (card singolo) --- */
-.role-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem;
-  border-radius: 16px;
-  width: 90%;
-  margin: 0 auto;
-  background: #1b263b;
-}
-
-.role-header {
-  width: 100%;
-  text-align: center;
-  background: #1d3557;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: white;
-  padding: 0.8rem;
-  border-radius: 12px 12px 0 0;
-}
-
-.role-image img {
-  width: 160px;
-  height: auto;
-  margin: 1rem 0;
-}
-
-.role-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: white;
-  margin: 0.5rem 0;
-  text-align: center;
-  background: rgba(0,0,0,0.15);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-}
-
-.role-description {
-  width: 100%;
-  text-align: left;
-  font-size: 0.95rem;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-top: 1rem;
-}
-
-.role-description p:first-child {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.role-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.role-actions .btn {
-  flex: 1;
-  padding: 0.8rem;
-  border-radius: 24px;
-  font-size: 1rem;
-}
-
-.role-actions .btn.primary {
-  background: #f4a261;
-  color: #fff;
-}
-
-.role-actions .btn:not(.primary) {
-  background: transparent;
-  border: 2px solid #f4a261;
-  color: #f4a261;
-}
-
-/* --- COLORI PER RUOLI SPECIFICI --- */
-.role-lupo { background: #3B5998; }
-.role-contadino { background: #8B2F2F; }
-.role-comandante { background: #B8860B; }
-.role-veggente { background: #B565A7; }
-.role-mitomane { background: #2E8B57; }
-.role-strega { background: #2F6B2F; }
-
-/* stato oscurato */
-.role-obscured {
-  filter: brightness(0.1) blur(4px);
-  color: transparent !important;
-  position: relative;
-}
-
-.role-obscured::after {
-  content: "OSCURA";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-weight: bold;
-  font-size: 1.5rem;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 8px 12px;
-  border-radius: 8px;
-}
-
-/* Popup overlay */
-.popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.popup.hidden {
-  display: none;
-}
-
-.popup-content {
-  background: #1b263b;
-  padding: 2rem;
-  border-radius: 12px;
-  text-align: center;
-  width: 80%;
-}
-
-.popup-content h3 {
-  margin-bottom: 1rem;
-}
-
-/* --- HOME (stile identico allo screenshot) --- */
+/* ---- HOME ---- */
 .home-container {
   text-align: left;
   padding: 2rem 1.5rem;
   max-width: 420px;
   margin: 0 auto;
 }
-
-.home-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin-bottom: 0.2rem;
-  color: #ffffff;
-}
-
-.home-subtitle {
-  font-size: 1rem;
-  color: #d1d5db;
-  margin-bottom: 2rem;
-}
+.home-title { font-size: 1.8rem; font-weight: bold; color: #fff; margin-bottom: 6px; }
+.home-subtitle { font-size: 1rem; color: #d1d5db; margin-bottom: 18px; }
 
 .home-card {
-  background: #1b2a4a; /* blu scuro */
+  background: #1b2a4a;
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-
-.home-card-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #ffffff;
-}
+.home-card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; color:#fff; }
 
 .home-card input {
   width: 100%;
@@ -341,130 +95,145 @@ body {
   background: transparent;
   color: #ffffff;
   font-size: 1rem;
-  outline: none;
 }
+.home-card input::placeholder { color: #9ca3af; }
+.home-card input:focus { border-color: #fbbf24; }
 
-.home-card input::placeholder {
-  color: #9ca3af;
-}
+.btn.primary { width: 100%; padding: 1rem; background: #fbbf24; color: #1b1b1b; font-weight:600; border-radius:8px; }
+.btn.primary:hover { background: #f59e0b; }
 
-.home-card input:focus {
-  border-color: #fbbf24; /* giallo focus */
-}
-
-.btn.primary {
-  width: 100%;
-  padding: 1rem;
-  background: #fbbf24; /* giallo */
-  color: #1b1b1b;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn.primary:hover {
-  background: #f59e0b; /* giallo più scuro */
-}
-
-/* --- VIEW ROOM --- */
+/* ---- ROOM ---- */
 .room-container {
   padding: 2rem 1.5rem;
   max-width: 420px;
   margin: 0 auto;
   text-align: center;
 }
+.room-title { font-size: 1.6rem; font-weight:700; color:#fff; margin-bottom: 6px; }
+.room-subtitle { font-size:1rem; color:#d1d5db; margin-bottom: 16px; }
+.room-subtitle span { font-weight:600; color:#fff; }
 
-.room-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: #ffffff;
-}
-
-.room-subtitle {
-  font-size: 1rem;
-  color: #d1d5db;
-  margin-bottom: 2rem;
-}
-
-.room-subtitle span {
-  font-weight: 600;
-  color: #ffffff;
-}
-
-/* Lista giocatori */
-.player-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 2rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
+/* player list */
+.player-list { list-style:none; padding:0; margin:0 0 2rem 0; display:flex; flex-direction:column; gap:1rem; }
 .player-list li {
   background: #35466e;
   border-radius: 24px;
   padding: 0.6rem 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #ffffff;
-  font-size: 1rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#fff;
 }
+.player-avatar { width:40px; height:40px; border-radius:50%; background:#fff; color:#1b263b; display:flex; align-items:center; justify-content:center; font-weight:700; margin-right:1rem; }
+.player-name { flex:1; text-align:left; }
 
-/* Avatar iniziali */
-.player-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #fff;
-  color: #1b263b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  margin-right: 1rem;
-}
+/* remove button */
+.remove-player { background:none; border:none; color:#fff; cursor:pointer; font-size:1.2rem; }
+.remove-player:hover { opacity:0.8; }
 
-/* Nome giocatore */
-.player-name {
-  flex: 1;
-  text-align: left;
-}
+/* start button */
+.room-start-btn { margin-top:1rem; width:100%; border-radius:24px; font-size:1rem; }
 
-/* Bottone elimina */
-.remove-player {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
+/* ---- ROLES LIST ---- */
+#viewRoles { text-align:center; padding:24px 16px; }
+.roles-grid { display:flex; flex-direction:column; gap:12px; margin-bottom:32px; align-items:center; }
 
-.remove-player:hover {
-  opacity: 0.8;
-}
-
-/* CTA Inizia Partita */
-.room-start-btn {
-  margin-top: 1rem;
-  width: 100%;
-  border-radius: 24px;
-  font-size: 1rem;
-}
-
-.logo-header {
-  height: 40px;   /* regola l’altezza come preferisci */
-  display: block;
-  margin: 0 auto; /* centra orizzontalmente */
-}
-
-.app-header {
-  background-color: #243c84 !important; /* blu header */
-  padding: 40px !important;
+.role-card {
+  width: 90%;
+  border-radius: 12px;
+  padding: 16px;
   text-align: center;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));
+}
+.role-card img { width:140px; height:auto; margin:0 auto 12px; display:block; }
+.role-name { display:block; margin-top:8px; font-size:18px; font-weight:bold; letter-spacing:1px; }
+
+.role-controls { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:12px; }
+.role-controls button {
+  width:36px; height:36px; border-radius:50%; border:none; background:#fff; color:#000; font-size:20px; cursor:pointer; font-weight:bold;
+}
+.role-controls span { font-size:18px; font-weight:bold; min-width:24px; text-align:center; }
+
+/* ---- ROLE DETAIL ---- */
+.role-container { display:flex; flex-direction:column; align-items:center; padding:1rem; border-radius:16px; width:90%; margin:0 auto; background:#1b263b; position:relative; }
+.role-header { width:100%; text-align:center; background:#1d3557; font-size:1.2rem; font-weight:bold; color:white; padding:0.8rem; border-radius:12px 12px 0 0; }
+.role-image { position:relative; width:100%; display:flex; align-items:center; justify-content:center; padding: 12px 0; }
+.role-image img { width:160px; height:auto; display:block; border-radius:12px; }
+
+/* overlay "Ruolo nascosto" (posizionato sopra immagine, apparirà quando role-obscured è attivo) */
+.role-hidden {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  opacity:0;
+  transition: opacity .18s ease;
+  font-weight:800;
+  font-size:1rem;
+  color:#fff;
+  background: rgba(0,0,0,0.5);
+  border-radius: 12px;
+}
+
+/* Title / description */
+.role-title { font-size:1.8rem; font-weight:bold; color:white; margin:0.5rem 0; text-align:center; background:rgba(0,0,0,0.15); padding:0.5rem 1rem; border-radius:8px; }
+.role-description { width:100%; text-align:left; font-size:0.95rem; background:rgba(255,255,255,0.12); padding:1rem; border-radius:8px; margin-top:1rem; }
+.role-description p:first-child { font-weight:bold; margin-bottom:0.5rem; }
+
+/* actions */
+.role-actions { display:flex; justify-content:center; gap:1rem; margin-top:1.5rem; width:100%; }
+.role-actions .btn { flex:1; padding:0.8rem; border-radius:24px; font-size:1rem; }
+.role-actions .btn.primary { background:#f4a261; color:#fff; }
+.role-actions .btn:not(.primary) { background:transparent; border:2px solid #f4a261; color:#f4a261; }
+
+/* specific role colors (for whole card background if desired) */
+.role-lupo { background: #3B5998; }
+.role-contadino { background: #8B2F2F; }
+.role-comandante { background: #B8860B; }
+.role-veggente { background: #B565A7; }
+.role-mitomane { background: #2E8B57; }
+.role-strega { background: #2F6B2F; }
+
+/* ---- 'oscuramento' stato ---- */
+.role-obscured {
+  filter: brightness(0.12) blur(2px);
+  color: transparent !important;
+  position: relative;
+}
+
+/* quando la card è oscurata mostriamo overlay dentro .role-hidden */
+.role-obscured .role-hidden { opacity: 1; pointer-events: auto; }
+
+/* popup */
+.popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; z-index:100; }
+.popup.hidden { display:none; }
+.popup-content { background:#1b263b; padding:2rem; border-radius:12px; text-align:center; width:80%; }
+.popup-content h3 { margin-bottom:1rem; }
+
+/* small screens adjustments */
+@media (max-width:420px) {
+  .logo-header { height:36px; }
+  .home-card { padding:1.2rem; }
+  .role-card img { width:120px; }
+  .role-image img { width:140px; }
+}
+
+.role-hidden-box {
+  background: #3b4f9c;  /* blu come nello screenshot */
+  border-radius: 16px;
+  padding: 40px 20px;
+  width: 90%;
+  max-width: 400px;
+  margin: 0 auto 20px auto;
+  text-align: center;
+}
+
+.role-hidden-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffffff;
 }

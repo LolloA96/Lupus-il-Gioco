@@ -125,7 +125,6 @@ function subscribeToRoom(roomId) {
     const data = doc.data();
     if (!data) return;
 
-    // setta host PRIMA di renderizzare la lista (così il pulsante di rimozione appare correttamente)
     if (data.host && currentPlayerName) {
       isHost = (data.host === currentPlayerName);
     } else {
@@ -139,13 +138,11 @@ function subscribeToRoom(roomId) {
       return;
     }
 
-    // 🔹 Rendering lista giocatori (salviamo il nome pulito in data-name)
     playerList.innerHTML = "";
     (data.players || []).forEach(p => {
       const li = document.createElement("li");
-      li.dataset.name = p; // salva il nome pulito
+      li.dataset.name = p;
 
-      // avatar con iniziali
       const avatar = document.createElement("div");
       avatar.className = "player-avatar";
       const initials = p.split(" ").map(w => w[0].toUpperCase()).join("").slice(0, 2);
@@ -158,7 +155,6 @@ function subscribeToRoom(roomId) {
       li.appendChild(avatar);
       li.appendChild(nameSpan);
 
-      // se sono host → pulsante rimuovi (non sul proprio nome)
       if (isHost && p !== currentPlayerName) {
         const removeBtn = document.createElement("button");
         removeBtn.className = "remove-player";
@@ -180,7 +176,6 @@ function subscribeToRoom(roomId) {
       playerList.appendChild(li);
     });
 
-    // 🔹 Controllo ruoli (se ci sono assignments e io ho un ruolo, mostro la mia carta)
     if (data.assignments && currentPlayerName) {
       const myRoleId = data.assignments[currentPlayerName];
       if (myRoleId) {
@@ -305,7 +300,6 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
       assignments[players[i]] = pool[i];
     }
 
-    // salva su Firestore
     await db.collection("rooms").doc(currentRoomId).update({ assignments });
 
     const myRoleId = assignments[currentPlayerName];
@@ -322,18 +316,16 @@ function showMyRoleById(roleId) {
   showMyRole(role);
 }
 
-// --- MOSTRA CARTA RUOLO (con oscuramento + Termina partita) ---
+// --- MOSTRA CARTA RUOLO (Ruolo nascosto per tutti, logica speciale per Mitomane) ---
 function showMyRole(role) {
   const roleCard = document.getElementById("viewRoleCard");
 
-  // Mitomane: trasformati (popup) + ruolo nascosto overlay
+  // --- MITOMANE ---
   if (role.id === "mitomane") {
     roleCard.innerHTML = `
       <div id="roleCardInner" class="role-container role-${role.id}">
-        <div class="role-header">LUPUS</div>
-        <div class="role-image">
-          <div class="role-hidden">Ruolo nascosto</div>
-          <img src="${role.img}" alt="${role.label}" />
+        <div class="role-hidden-box">
+          <p class="role-hidden-text">Ruolo nascosto</p>
         </div>
         <h2 class="role-title">${role.label.toUpperCase()}</h2>
         <div class="role-description"><p>${role.description}</p></div>
@@ -352,31 +344,20 @@ function showMyRole(role) {
     `;
     showView(viewRoleCard);
 
-    // attach listeners and prevent propagation so clicking buttons doesn't toggle hide
-    const cardInner = document.getElementById("roleCardInner");
-    if (cardInner) {
-      cardInner.addEventListener("click", () => {
-        cardInner.classList.toggle("role-obscured");
-      });
-    }
-
     const transformBtn = document.getElementById("btnTransform");
     const popup = document.getElementById("mitomanePopup");
     const popupRoles = document.getElementById("popupRoles");
     const closePopup = document.getElementById("btnClosePopup");
 
     if (transformBtn) {
-      transformBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
+      transformBtn.addEventListener("click", () => {
         popup.classList.remove("hidden");
         popupRoles.innerHTML = "";
         ROLES.filter(r => r.id !== "mitomane").forEach(r => {
           const btn = document.createElement("button");
           btn.className = "btn";
-          btn.type = "button";
           btn.innerText = r.label;
-          btn.addEventListener("click", (ev) => {
-            ev.stopPropagation();
+          btn.addEventListener("click", () => {
             popup.classList.add("hidden");
             showMyRole(r);
           });
@@ -385,43 +366,27 @@ function showMyRole(role) {
       });
     }
     if (closePopup) {
-      closePopup.addEventListener("click", (e) => {
-        e.stopPropagation();
-        popup.classList.add("hidden");
-      });
+      closePopup.addEventListener("click", () => popup.classList.add("hidden"));
     }
-
     return;
   }
 
-  // Ruoli normali: solo Termina partita + ruolo nascosto overlay
+  // --- RUOLI NORMALI ---
   roleCard.innerHTML = `
     <div id="roleCardInner" class="role-container role-${role.id}">
-      <div class="role-header">LUPUS</div>
-      <div class="role-image">
-        <div class="role-hidden">Ruolo nascosto</div>
-        <img src="${role.img}" alt="${role.label}" />
+      <div class="role-hidden-box">
+        <p class="role-hidden-text">Ruolo nascosto</p>
       </div>
-      <h2 class="role-title">${role.label.toUpperCase()}</h2>
-      <div class="role-description"><p>${role.description}</p></div>
       <div class="role-actions">
-        <button id="btnEndGame" class="btn primary" type="button">Termina partita</button>
+        <button id="btnEndGame" class="btn primary">Termina partita</button>
       </div>
     </div>
   `;
   showView(viewRoleCard);
 
-  const cardInner = document.getElementById("roleCardInner");
-  if (cardInner) {
-    cardInner.addEventListener("click", () => {
-      cardInner.classList.toggle("role-obscured");
-    });
-  }
-
   const endBtn = document.getElementById("btnEndGame");
   if (endBtn) {
-    endBtn.addEventListener("click", async (e) => {
-      e.stopPropagation();
+    endBtn.addEventListener("click", async () => {
       if (!currentRoomId) return;
       try {
         await db.collection("rooms").doc(currentRoomId).update({
