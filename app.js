@@ -209,7 +209,56 @@ const ROLES = [
 const selectedCounts = {};
 ROLES.forEach(r => selectedCounts[r.id] = 0);
 
-// --- RENDER CARD RUOLI ---
+// --- UTILITY: shuffle ---
+function shuffleArray(array) {
+  const a = array.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// --- FUNZIONE DI ASSEGNAZIONE (ora richiamabile da qualsiasi button creato dinamicamente) ---
+async function assignRolesAction() {
+  try {
+    const players = Array.from(document.querySelectorAll("#playerList li"))
+      .map(li => (li.dataset.name || "").trim())
+      .filter(n => n.length > 0);
+
+    const playersCount = players.length;
+    let totalSelected = Object.values(selectedCounts).reduce((a, b) => a + b, 0);
+
+    if (playersCount === 0) {
+      alert("Non ci sono giocatori in stanza.");
+      return;
+    }
+    if (totalSelected !== playersCount) {
+      alert(`Devi scegliere esattamente ${playersCount} ruoli. Hai scelto ${totalSelected}.`);
+      return;
+    }
+
+    let pool = [];
+    Object.keys(selectedCounts).forEach(roleId => {
+      for (let i = 0; i < selectedCounts[roleId]; i++) pool.push(roleId);
+    });
+    pool = shuffleArray(pool);
+
+    const assignments = {};
+    for (let i = 0; i < playersCount; i++) {
+      assignments[players[i]] = pool[i];
+    }
+
+    await db.collection("rooms").doc(currentRoomId).update({ assignments });
+
+    const myRoleId = assignments[currentPlayerName];
+    if (myRoleId) showMyRoleById(myRoleId);
+  } catch (err) {
+    console.error("Errore assegnazione ruoli:", err);
+  }
+}
+
+// --- RENDER CARD RUOLI (con bottoni fluttuanti creati in sicurezza) ---
 function renderRolesUI() {
   const container = document.getElementById("rolesContainer");
   if (!container) return;
@@ -263,51 +312,46 @@ function renderRolesUI() {
     card.appendChild(controls);
     container.appendChild(card);
   });
+
+  // --- BOTTONI FLUTTUANTI (sicuri, non dipendono da elementi esistenti) ---
+  // rimuovo eventuali container precedenti per evitare duplicati
+  const existing = document.getElementById("rolesFloatingActions");
+  if (existing) existing.remove();
+
+  const actions = document.createElement("div");
+  actions.id = "rolesFloatingActions";
+  actions.className = "roles-actions";
+
+  // crea assign button (se vuoi puoi anche spostare il pulsante statico esistente invece di crearne uno nuovo)
+  const assignBtn = document.createElement("button");
+  assignBtn.id = "btnAssignRoles_floating";
+  assignBtn.className = "btn primary";
+  assignBtn.textContent = "Assegna ruoli";
+  assignBtn.addEventListener("click", assignRolesAction);
+
+  // crea cancel button
+  const cancelBtn = document.createElement("button");
+  cancelBtn.id = "btnCancelGameRoles_floating";
+  cancelBtn.className = "btn secondary";
+  cancelBtn.textContent = "Chiudi partita";
+  cancelBtn.addEventListener("click", cancelGame);
+
+  actions.appendChild(assignBtn);
+  actions.appendChild(cancelBtn);
+
+  // append su body così è sempre visibile/posizionato fixed
+  document.body.appendChild(actions);
+
+  // nascondo il bottone statico originale (se presente nel markup) per evitare confusione
+  const staticAssign = document.getElementById("btnAssignRoles");
+  if (staticAssign) staticAssign.style.display = "none";
 }
 
+// aggiorna numeri
 function updateCount(roleId) {
   const el = document.getElementById(`count-${roleId}`);
   if (el) el.innerText = selectedCounts[roleId];
 }
-
-// --- ASSEGNA RUOLI ---
-document.getElementById("btnAssignRoles").addEventListener("click", async () => {
-  try {
-    const players = Array.from(document.querySelectorAll("#playerList li"))
-      .map(li => (li.dataset.name || "").trim())
-      .filter(n => n.length > 0);
-
-    const playersCount = players.length;
-    let totalSelected = Object.values(selectedCounts).reduce((a, b) => a + b, 0);
-
-    if (playersCount === 0) {
-      alert("Non ci sono giocatori in stanza.");
-      return;
-    }
-    if (totalSelected !== playersCount) {
-      alert(`Devi scegliere esattamente ${playersCount} ruoli. Hai scelto ${totalSelected}.`);
-      return;
-    }
-
-    let pool = [];
-    Object.keys(selectedCounts).forEach(roleId => {
-      for (let i = 0; i < selectedCounts[roleId]; i++) pool.push(roleId);
-    });
-    pool = shuffleArray(pool);
-
-    const assignments = {};
-    for (let i = 0; i < playersCount; i++) {
-      assignments[players[i]] = pool[i];
-    }
-
-    await db.collection("rooms").doc(currentRoomId).update({ assignments });
-
-    const myRoleId = assignments[currentPlayerName];
-    if (myRoleId) showMyRoleById(myRoleId);
-  } catch (err) {
-    console.error("Errore assegnazione ruoli:", err);
-  }
-});
 
 // --- Mostra ruolo ---
 function showMyRoleById(roleId) {
@@ -332,86 +376,85 @@ function showMyRole(role) {
 
   const bgColor = ROLE_COLORS[role.id] || "#1b263b";
 
-// --- MITOMANE ---
-if (role.id === "mitomane") {
-  roleCard.innerHTML = `
-    <div class="role-container">
-      <div class="role-card-top" style="background:${bgColor}">
-        <img src="${role.img}" alt="${role.label}" />
+  // --- MITOMANE ---
+  if (role.id === "mitomane") {
+    roleCard.innerHTML = `
+      <div class="role-container">
+        <div class="role-card-top" style="background:${bgColor}">
+          <img src="${role.img}" alt="${role.label}" />
+        </div>
+        <div class="role-card-bottom" style="background:${bgColor}">
+          <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
+          <p>${role.description}</p>
+        </div>
+        <div class="role-actions">
+          <button id="btnTransform" class="btn primary">Trasformati</button>
+          <button id="btnEndGame" class="btn primary">Termina partita</button>
+        </div>
       </div>
-      <div class="role-card-bottom" style="background:${bgColor}">
-        <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
-        <p>${role.description}</p>
-      </div>
-      <div class="role-actions">
-        <button id="btnTransform" class="btn primary">Trasformati</button>
-        <button id="btnEndGame" class="btn secondary">Termina partita</button>
-      </div>
-    </div>
-  `;
-  showView(viewRoleCard);
+    `;
+    showView(viewRoleCard);
 
-  const popup = document.getElementById("popupTransform");
-  const choicesContainer = document.getElementById("transformChoices");
+    // --- TRASFORMAZIONE MITOMANE ---
+    document.getElementById("btnTransform").addEventListener("click", async () => {
+      const snapshot = await db.collection("rooms").doc(currentRoomId).get();
+      const data = snapshot.data();
+      if (!data || !data.assignments) return;
 
-  // Apri popup alla pressione di Trasformati
-  document.getElementById("btnTransform").addEventListener("click", async () => {
-    const snapshot = await db.collection("rooms").doc(currentRoomId).get();
-    const data = snapshot.data();
-    if (!data || !data.assignments) return;
+      // Lista giocatori tra cui scegliere (escludo me)
+      const otherPlayers = Object.keys(data.assignments).filter(p => p !== currentPlayerName);
 
-    const otherPlayers = Object.keys(data.assignments).filter(p => p !== currentPlayerName);
-    if (otherPlayers.length === 0) {
-      alert("Non ci sono altri giocatori da imitare!");
-      return;
-    }
+      if (otherPlayers.length === 0) {
+        alert("Non ci sono altri giocatori da imitare!");
+        return;
+      }
 
-    // Mostra popup
-    popup.classList.remove("hidden");
-    choicesContainer.innerHTML = "";
+      // Mostro un popup semplice (puoi sostituirlo con UI più carina)
+      // Qui creiamo una lista modale dinamica (più simile a quello che chiedi)
+      const popup = document.createElement("div");
+      popup.className = "popup";
+      popup.id = "mitoPopupCustom";
+      popup.innerHTML = `
+        <div class="popup-content">
+          <h3>Trasformazione Mitomane</h3>
+          <p>Scegli il ruolo che vuoi assumere. Questa scelta è irreversibile!</p>
+          <div id="mitoOptions"></div>
+          <button id="mitoCloseBtn" class="btn">Chiudi</button>
+        </div>
+      `;
+      document.body.appendChild(popup);
 
-    // Ruoli trasformabili (solo quelli già assegnati ad altri giocatori)
-    otherPlayers.forEach(p => {
-      const r = data.assignments[p];
-      const roleData = ROLES.find(ro => ro.id === r);
-      if (!roleData) return;
-
-      const btn = document.createElement("button");
-      btn.className = `btn-${roleData.id}`;
-      btn.innerHTML = `<strong>${roleData.label.toUpperCase()}</strong><br><span>Sei il ${roleData.label.toUpperCase()}!</span>`;
-      
-      btn.addEventListener("click", async () => {
-        await db.collection("rooms").doc(currentRoomId).update({
-          [`assignments.${currentPlayerName}`]: roleData.id
+      const options = document.getElementById("mitoOptions");
+      otherPlayers.forEach(p => {
+        const roleId = data.assignments[p];
+        const r = ROLES.find(rr => rr.id === roleId);
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.style.display = "block";
+        btn.style.width = "100%";
+        btn.style.margin = "8px 0";
+        btn.textContent = `${r ? r.label.toUpperCase() : roleId} — ${p}`;
+        btn.addEventListener("click", async () => {
+          // aggiorna il DB: il mitomane assume il ruolo scelto
+          await db.collection("rooms").doc(currentRoomId).update({
+            [`assignments.${currentPlayerName}`]: roleId
+          });
+          document.body.removeChild(popup);
+          alert(`Ti sei trasformato! Ora hai il ruolo di ${ (r ? r.label : roleId).toUpperCase() }.`);
+          // mostra la nuova carta ruolo
+          const newRole = ROLES.find(rr => rr.id === roleId);
+          if (newRole) showMyRole(newRole);
         });
-        popup.classList.add("hidden");
-        alert(`Ti sei trasformato! Ora sei un ${roleData.label.toUpperCase()}.`);
+        options.appendChild(btn);
       });
 
-      choicesContainer.appendChild(btn);
+      document.getElementById("mitoCloseBtn").addEventListener("click", () => {
+        const el = document.getElementById("mitoPopupCustom");
+        if (el) document.body.removeChild(el);
+      });
     });
-  });
 
-  // Chiudi popup
-  document.getElementById("btnClosePopup").addEventListener("click", () => {
-    popup.classList.add("hidden");
-  });
-
-  // Termina partita
-  document.getElementById("btnEndGame").addEventListener("click", async () => {
-    if (!currentRoomId) return;
-    await db.collection("rooms").doc(currentRoomId).update({
-      ended: true,
-      endedAt: Date.now(),
-      endedBy: currentPlayerName || null
-    });
-    showView(viewHome);
-  });
-
-  return;
-}
-
-    // --- TERMINE PARTITA ---
+    // --- TERMINE PARTITA (vale per tutti i giocatori) ---
     document.getElementById("btnEndGame").addEventListener("click", async () => {
       if (!currentRoomId) return;
       await db.collection("rooms").doc(currentRoomId).update({
@@ -442,6 +485,7 @@ if (role.id === "mitomane") {
   `;
   showView(viewRoleCard);
 
+  // --- TERMINE PARTITA (vale per tutti i giocatori) ---
   document.getElementById("btnEndGame").addEventListener("click", async () => {
     if (!currentRoomId) return;
     await db.collection("rooms").doc(currentRoomId).update({
@@ -451,16 +495,6 @@ if (role.id === "mitomane") {
     });
     showView(viewHome);
   });
-}
-
-// --- UTILITY: shuffle ---
-function shuffleArray(array) {
-  const a = array.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
 }
 
 // --- ANNULLA PARTITA ---
@@ -479,8 +513,5 @@ async function cancelGame() {
   }
 }
 
-// Listener da schermata RUOLI
-document.getElementById("btnCancelGameRoles")?.addEventListener("click", cancelGame);
-
-// Listener da schermata ROOM
+// Listener da schermata ROOM (se esistono pulsanti statici)
 document.getElementById("btnCancelGameRoom")?.addEventListener("click", cancelGame);
