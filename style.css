@@ -41,13 +41,18 @@ body {
 /* buttons */
 .btn {
   display: block;
-  margin-top: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1rem;
+    margin-top: 0.5rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #f4a261;
+    font-size: 1rem;
+    width: 100%;
+    background: transparent;
+    border: 1px solid #f4a261;
+
 }
 .btn.primary { background: #f4a261; color: #fff; }
 
@@ -142,8 +147,8 @@ body {
 /* ---- ROLE DETAIL ---- */
 .role-container { display:flex; flex-direction:column; align-items:center; padding:1rem; border-radius:16px; width:90%; margin:0 auto; background:#1b263b; position:relative; }
 
-.role-card-top { border-radius:12p; padding:1.5rem; text-align:center; margin-bottom: 24px; width: 100%; color:#fff; }
-.role-card-top img { width:120px; height:auto; margin-bottom:1rem; }
+.role-card-top { border: radius 12px;; padding:1.5rem; text-align:center; margin-bottom: 24px; width: 100%; color:#fff; }
+.role-card-top img { width: 300px;px; height:auto; margin-bottom:1rem; }
 .role-name-card { font-size:1.6rem; font-weight:bold; }
 
 .role-card-bottom { border-radius: 12px; padding: 1.5em;rem; text-align:center; color:#fff; width: 100%;  }

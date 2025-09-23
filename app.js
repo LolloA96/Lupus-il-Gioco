@@ -332,92 +332,98 @@ function showMyRole(role) {
 
   const bgColor = ROLE_COLORS[role.id] || "#1b263b";
 
-  // Layout con due card (immagine sopra + descrizione sotto, niente titolo duplicato)
-  roleCard.innerHTML = `
-    <div class="role-container">
-      <div class="role-card-top" style="background:${bgColor}">
-        <img src="${role.img}" alt="${role.label}" />
-      </div>
-      <div class="role-card-bottom" style="background:${bgColor}">
-        <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
-        <p>${role.description}</p>
-      </div>
-      <div class="role-actions">
-        ${
-          role.id === "mitomane"
-            ? `<button id="btnTransform" class="btn primary">Trasformati</button>`
-            : ""
-        }
-        <button id="btnEndGame" class="btn primary">Termina partita</button>
-        <button id="btnCancelGameRole" class="btn secondary">Chiudi partita</button>
-      </div>
-    </div>
-  `;
-  showView(viewRoleCard);
-
   // --- MITOMANE ---
-if (role.id === "mitomane") {
-  roleCard.innerHTML = `
-    <div class="role-container">
-      <div class="role-card-top" style="background:${bgColor}">
-        <img src="${role.img}" alt="${role.label}" />
+  if (role.id === "mitomane") {
+    roleCard.innerHTML = `
+      <div class="role-container">
+        <div class="role-card-top" style="background:${bgColor}">
+          <img src="${role.img}" alt="${role.label}" />
+        </div>
+        <div class="role-card-bottom" style="background:${bgColor}">
+          <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
+          <p>${role.description}</p>
+        </div>
+        <div class="role-actions">
+          <button id="btnTransform" class="btn primary">Trasformati</button>
+          <button id="btnEndGame" class="btn secondary">Termina partita</button>
+        </div>
       </div>
-      <div class="role-card-bottom" style="background:${bgColor}">
-        <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
-        <p>${role.description}</p>
-      </div>
-      <div class="role-actions">
-        <button id="btnTransform" class="btn primary">Trasformati</button>
-        <button id="btnEndGame" class="btn secondary">Termina partita</button>
-      </div>
-    </div>
-  `;
-  showView(viewRoleCard);
+    `;
+    showView(viewRoleCard);
 
-  // --- TRASFORMAZIONE MITOMANE ---
-  document.getElementById("btnTransform").addEventListener("click", async () => {
-    const snapshot = await db.collection("rooms").doc(currentRoomId).get();
-    const data = snapshot.data();
-    if (!data || !data.assignments) return;
+    // --- TRASFORMAZIONE MITOMANE ---
+    document.getElementById("btnTransform").addEventListener("click", async () => {
+      const snapshot = await db.collection("rooms").doc(currentRoomId).get();
+      const data = snapshot.data();
+      if (!data || !data.assignments) return;
 
-    // Lista giocatori tra cui scegliere
-    const otherPlayers = Object.keys(data.assignments).filter(p => p !== currentPlayerName);
+      const otherPlayers = Object.keys(data.assignments).filter(p => p !== currentPlayerName);
 
-    if (otherPlayers.length === 0) {
-      alert("Non ci sono altri giocatori da imitare!");
-      return;
-    }
+      if (otherPlayers.length === 0) {
+        alert("Non ci sono altri giocatori da imitare!");
+        return;
+      }
 
-    // Mostra un prompt per scegliere
-    const chosen = prompt(`Scegli un giocatore da imitare:\n${otherPlayers.join(", ")}`);
-    if (!chosen || !otherPlayers.includes(chosen)) {
-      alert("Scelta non valida!");
-      return;
-    }
+      const chosen = prompt(`Scegli un giocatore da imitare:\n${otherPlayers.join(", ")}`);
+      if (!chosen || !otherPlayers.includes(chosen)) {
+        alert("Scelta non valida!");
+        return;
+      }
 
-    // Copia il ruolo del giocatore scelto
-    const chosenRole = data.assignments[chosen];
-    if (!chosenRole) {
-      alert("Quel giocatore non ha ancora un ruolo.");
-      return;
-    }
+      const chosenRole = data.assignments[chosen];
+      if (!chosenRole) {
+        alert("Quel giocatore non ha ancora un ruolo.");
+        return;
+      }
 
-    // Aggiorna il DB: il mitomane diventa il ruolo scelto
-    await db.collection("rooms").doc(currentRoomId).update({
-      [`assignments.${currentPlayerName}`]: chosenRole
+      await db.collection("rooms").doc(currentRoomId).update({
+        [`assignments.${currentPlayerName}`]: chosenRole
+      });
+
+      alert(`Ti sei trasformato! Ora sei un ${chosenRole.toUpperCase()}.`);
     });
 
-    alert(`Ti sei trasformato! Ora sei un ${chosenRole.toUpperCase()}.`);
-  });
+    // --- TERMINE PARTITA ---
+    document.getElementById("btnEndGame").addEventListener("click", async () => {
+      if (!currentRoomId) return;
+      await db.collection("rooms").doc(currentRoomId).update({
+        ended: true,
+        endedAt: Date.now(),
+        endedBy: currentPlayerName || null
+      });
+      showView(viewHome);
+    });
+
+    return;
+  }
+
+  // --- RUOLI NORMALI ---
+  roleCard.innerHTML = `
+    <div class="role-container">
+      <div class="role-card-top" style="background:${bgColor}">
+        <img src="${role.img}" alt="${role.label}" />
+      </div>
+      <div class="role-card-bottom" style="background:${bgColor}">
+        <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
+        <p>${role.description}</p>
+      </div>
+      <div class="role-actions">
+        <button id="btnEndGame" class="btn primary">Termina partita</button>
+      </div>
+    </div>
+  `;
+  showView(viewRoleCard);
 
   document.getElementById("btnEndGame").addEventListener("click", async () => {
     if (!currentRoomId) return;
-    await db.collection("rooms").doc(currentRoomId).update({ ended: true });
+    await db.collection("rooms").doc(currentRoomId).update({
+      ended: true,
+      endedAt: Date.now(),
+      endedBy: currentPlayerName || null
+    });
     showView(viewHome);
   });
-
-  return;
-}}
+}
 
 // --- UTILITY: shuffle ---
 function shuffleArray(array) {
