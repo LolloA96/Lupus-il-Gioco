@@ -192,3 +192,31 @@ body {
   .role-card img { width:120px; }
   .role-image img { width:140px; }
 }
+
+.role-hidden {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.role-hidden-box {
+  background: #3b4f9c;
+  border-radius: 16px;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.role-hidden-text {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.role-hidden.active { opacity: 1; }
+.role-hidden:not(.active) { opacity: 0; pointer-events: none; }
