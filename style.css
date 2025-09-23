@@ -462,3 +462,9 @@ body {
   display: block;
   margin: 0 auto; /* centra orizzontalmente */
 }
+
+.app-header {
+  background-color: #243c84 !important; /* blu header */
+  padding: 40px;
+  text-align: center;
+}
