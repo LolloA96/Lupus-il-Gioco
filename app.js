@@ -1,4 +1,4 @@
-// app.js (versione aggiornata corretta con gestione host/player e fix Inizia Partita)
+// app.js (versione aggiornata con gestione host/player, fix Inizia Partita e ruolo nascosto)
 
 let currentRoomId = null;
 let currentPlayerName = null;
@@ -64,8 +64,6 @@ btnCreate.addEventListener("click", async () => {
     currentPlayerName = playerName;
     isHost = true;
 
-    console.log("✅ Stanza creata:", currentRoomId, "Giocatore:", currentPlayerName);
-
     document.getElementById("roomTitle").innerText = `Stanza: ${roomName}`;
     showView(viewRoom);
     subscribeToRoom(currentRoomId);
@@ -102,8 +100,6 @@ btnJoin.addEventListener("click", async () => {
     currentPlayerName = name;
     isHost = false;
 
-    console.log("✅ Entrato nella stanza:", currentRoomId, "Giocatore:", currentPlayerName);
-
     document.getElementById("roomTitle").innerText = `Stanza: ${roomName}`;
     showView(viewRoom);
 
@@ -129,11 +125,8 @@ function subscribeToRoom(roomId) {
     const data = doc.data();
     if (!data) return;
 
-    // setta host PRIMA di renderizzare la lista (così il pulsante di rimozione appare correttamente)
     if (data.host && currentPlayerName) {
       isHost = (data.host === currentPlayerName);
-    } else {
-      isHost = false;
     }
 
     if (data.ended) {
@@ -143,17 +136,15 @@ function subscribeToRoom(roomId) {
       return;
     }
 
-    // 🔹 Rendering lista giocatori (salviamo il nome pulito in data-name)
+    // 🔹 Rendering lista giocatori
     playerList.innerHTML = "";
     (data.players || []).forEach(p => {
       const li = document.createElement("li");
-      li.dataset.name = p; // salva il nome pulito
+      li.dataset.name = p;
 
-      // avatar con iniziali
       const avatar = document.createElement("div");
       avatar.className = "player-avatar";
-      const initials = p.split(" ").map(w => w[0].toUpperCase()).join("").slice(0, 2);
-      avatar.textContent = initials;
+      avatar.textContent = p.split(" ").map(w => w[0].toUpperCase()).join("").slice(0, 2);
 
       const nameSpan = document.createElement("span");
       nameSpan.className = "player-name";
@@ -162,7 +153,6 @@ function subscribeToRoom(roomId) {
       li.appendChild(avatar);
       li.appendChild(nameSpan);
 
-      // se sono host → pulsante rimuovi (non sul proprio nome)
       if (isHost && p !== currentPlayerName) {
         const removeBtn = document.createElement("button");
         removeBtn.className = "remove-player";
@@ -184,13 +174,9 @@ function subscribeToRoom(roomId) {
       playerList.appendChild(li);
     });
 
-    // 🔹 Controllo ruoli (se ci sono assignments e io ho un ruolo, mostro la mia carta)
     if (data.assignments && currentPlayerName) {
       const myRoleId = data.assignments[currentPlayerName];
-      if (myRoleId) {
-        console.log("Snapshot: ho un ruolo, mostro la mia carta:", myRoleId);
-        showMyRoleById(myRoleId);
-      }
+      if (myRoleId) showMyRoleById(myRoleId);
     }
   });
 }
@@ -211,8 +197,8 @@ const ROLES = [
   { id: "contadino", label: "Contadino", description: "Il tuo ruolo è quello di scovare tutti i lupi all’interno del villaggio!", img: "img/contadino.png" },
   { id: "comandante", label: "Comandante", description: "Il tuo ruolo è quello di proteggere una persona a tua scelta ogni notte. Puoi salvare anche te stesso per una notte.", img: "img/comandante.png" },
   { id: "veggente", label: "Veggente", description: "Il tuo ruolo è quello di scoprire i lupi per poi aiutare il villaggio ad ucciderlo.", img: "img/veggente.png" },
-  { id: "mitomane", label: "Mitomane", description: "Il tuo ruolo è quello di indicare un giocatore a sua scelta e ne prende i poteri (il potere vale solo ad inizio partita).", img: "img/mitomane.png" },
-  { id: "strega", label: "Strega", description: "Il tuo ruolo è quello di scoprire chi è il lupo e resuscitare una persona (i poteri potranno essere usati dalla seconda notte).", img: "img/strega.png" }
+  { id: "mitomane", label: "Mitomane", description: "Il tuo ruolo è quello di indicare un giocatore a sua scelta e ne prende i poteri.", img: "img/mitomane.png" },
+  { id: "strega", label: "Strega", description: "Il tuo ruolo è quello di scoprire chi è il lupo e resuscitare una persona.", img: "img/strega.png" }
 ];
 
 const selectedCounts = {};
@@ -280,20 +266,12 @@ function updateCount(roleId) {
 // --- ASSEGNA RUOLI ---
 document.getElementById("btnAssignRoles").addEventListener("click", async () => {
   try {
-    if (!currentRoomId) {
-      alert("Room non impostata.");
-      return;
-    }
-
-    // prendi i nomi puliti dai dataset delle li
     const players = Array.from(document.querySelectorAll("#playerList li"))
-      .map(li => (li.dataset.name || li.textContent || "").trim())
+      .map(li => (li.dataset.name || "").trim())
       .filter(n => n.length > 0);
 
     const playersCount = players.length;
-
-    let totalSelected = 0;
-    Object.values(selectedCounts).forEach(v => totalSelected += v);
+    let totalSelected = Object.values(selectedCounts).reduce((a, b) => a + b, 0);
 
     if (playersCount === 0) {
       alert("Non ci sono giocatori in stanza.");
@@ -304,37 +282,21 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
       return;
     }
 
-    // costruisci pool di roleId (ripeti roleId count volte)
     let pool = [];
     Object.keys(selectedCounts).forEach(roleId => {
       for (let i = 0; i < selectedCounts[roleId]; i++) pool.push(roleId);
     });
-
-    // mescola la pool
     pool = shuffleArray(pool);
 
-    // crea mapping player -> roleId (nell'ordine della lista)
     const assignments = {};
     for (let i = 0; i < playersCount; i++) {
       assignments[players[i]] = pool[i];
     }
 
-    // salva su Firestore
-    const roomRef = db.collection("rooms").doc(currentRoomId);
-    await roomRef.update({ assignments });
+    await db.collection("rooms").doc(currentRoomId).update({ assignments });
 
-    console.log("Assignments saved:", assignments);
-    console.log("Io sono:", currentPlayerName, "Il mio ruolo:", assignments[currentPlayerName]);
-
-    // Se il giocatore corrente ha un ruolo, mostra subito la sua carta (non fare redirect forzati)
     const myRoleId = assignments[currentPlayerName];
-    if (myRoleId) {
-      showMyRoleById(myRoleId);
-    } else {
-      // se non sei nella stanza per qualche motivo, torna alla view room
-      showView(viewRoom);
-    }
-
+    if (myRoleId) showMyRoleById(myRoleId);
   } catch (err) {
     console.error("Errore assegnazione ruoli:", err);
   }
@@ -343,77 +305,14 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
 // --- Mostra ruolo ---
 function showMyRoleById(roleId) {
   const role = ROLES.find(r => r.id === roleId);
-  if (!role) {
-    console.warn("Role not found:", roleId);
-    return;
-  }
+  if (!role) return;
   showMyRole(role);
 }
 
-// --- MOSTRA CARTA RUOLO ---
+// --- MOSTRA CARTA RUOLO (con oscuramento) ---
 function showMyRole(role) {
   const roleCard = document.getElementById("viewRoleCard");
 
-  // Mitomane → solo Trasformati
-  if (role.id === "mitomane") {
-    roleCard.innerHTML = `
-      <div id="roleCardInner" class="role-container role-${role.id}">
-        <div class="role-header">LUPUS</div>
-        <div class="role-image">
-          <img src="${role.img}" alt="${role.label}" />
-        </div>
-        <h2 class="role-title">${role.label.toUpperCase()}</h2>
-        <div class="role-description">
-          <p>${role.description}</p>
-        </div>
-        <div class="role-actions">
-          <button id="btnTransform" class="btn primary">Trasformati</button>
-        </div>
-      </div>
-
-      <div id="mitomanePopup" class="popup hidden">
-        <div class="popup-content">
-          <h3>Scegli il personaggio in cui trasformarti</h3>
-          <div id="popupRoles"></div>
-          <button id="btnClosePopup" class="btn">Chiudi</button>
-        </div>
-      </div>
-    `;
-    showView(viewRoleCard);
-
-    const transformBtn = document.getElementById("btnTransform");
-    const popup = document.getElementById("mitomanePopup");
-    const popupRoles = document.getElementById("popupRoles");
-    const closePopup = document.getElementById("btnClosePopup");
-
-    if (transformBtn) {
-      transformBtn.addEventListener("click", () => {
-        popup.classList.remove("hidden");
-        popupRoles.innerHTML = "";
-
-        ROLES.filter(r => r.id !== "mitomane").forEach(r => {
-          const btn = document.createElement("button");
-          btn.className = "btn";
-          btn.innerText = r.label;
-          btn.addEventListener("click", () => {
-            popup.classList.add("hidden");
-            showMyRole(r);
-          });
-          popupRoles.appendChild(btn);
-        });
-      });
-    }
-
-    if (closePopup) {
-      closePopup.addEventListener("click", () => {
-        popup.classList.add("hidden");
-      });
-    }
-
-    return;
-  }
-
-  // --- Ruoli normali ---
   roleCard.innerHTML = `
     <div id="roleCardInner" class="role-container role-${role.id}">
       <div class="role-header">LUPUS</div>
@@ -425,39 +324,17 @@ function showMyRole(role) {
         <p>${role.description}</p>
       </div>
       <div class="role-actions">
-        <button id="btnEndGame" class="btn primary">Termina partita</button>
         <button id="btnCloseGame" class="btn">Chiudi partita</button>
       </div>
     </div>
   `;
   showView(viewRoleCard);
 
-  // toggle oscuramento anche su mobile (usiamo 'click' che funziona su touch)
+  // toggle oscuramento (funziona anche su mobile con click/tap)
   const cardInner = document.getElementById("roleCardInner");
   if (cardInner) {
     cardInner.addEventListener("click", () => {
       cardInner.classList.toggle("role-obscured");
-    });
-  }
-
-  const endBtn = document.getElementById("btnEndGame");
-  if (endBtn) {
-    endBtn.addEventListener("click", async () => {
-      if (!currentRoomId) return;
-      try {
-        const roomSnap = await db.collection("rooms").doc(currentRoomId).get();
-        const data = roomSnap.data() || {};
-        if (data.host && data.host !== currentPlayerName) {
-          return alert("Solo l'host può terminare la partita per tutti.");
-        }
-        await db.collection("rooms").doc(currentRoomId).update({
-          ended: true,
-          endedAt: Date.now(),
-          endedBy: currentPlayerName || null
-        });
-      } catch (err) {
-        console.error("Errore nel terminare la partita:", err);
-      }
     });
   }
 
