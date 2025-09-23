@@ -15,20 +15,17 @@ body {
   background-color: #1b2a4a   /* blu come nello screen */
   padding: 20px 0;
   text-align: center;
-  width: 100%;
+  width: 100% !important;
   position: fixed;
-  top: 0;
-  left: 0;
   z-index: 1000;
   border-radius: 0 0 12px 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 .logo-header {
   height: 40px;
   display: block;
   margin: 0 auto;
-  padding: 40px;
+  padding: 20px;
   background-color: #354C96;
 }
 
