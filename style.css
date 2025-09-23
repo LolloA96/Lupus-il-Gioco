@@ -176,7 +176,7 @@ body {
 /* actions */
 .role-actions { display:flex; justify-content:center; gap:1rem; margin-top:1.5rem; width:100%; }
 .role-actions .btn { flex:1; padding:0.8rem; border-radius:24px; font-size:1rem; }
-.role-actions .btn.primary { background:#f4a261; color:#fff; }
+.role-actions .btn.primary { background:#fbbf24; color:#000; }
 .role-actions .btn:not(.primary) { background:transparent; border:2px solid #f4a261; color:#f4a261; }
 
 /* popup */
