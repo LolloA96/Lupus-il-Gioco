@@ -349,13 +349,43 @@ function showMyRole(role) {
           <button id="btnEndGame" class="btn secondary">Termina partita</button>
         </div>
       </div>
+
+      <div id="mitomanePopup" class="popup hidden">
+        <div class="popup-content">
+          <h3>Scegli il personaggio in cui trasformarti</h3>
+          <div id="popupRoles"></div>
+          <button id="btnClosePopup" class="btn" type="button">Chiudi</button>
+        </div>
+      </div>
     `;
     showView(viewRoleCard);
 
-    document.getElementById("btnTransform").addEventListener("click", () => {
-      alert("Funzione di trasformazione in sviluppo!");
-    });
+    // Gestione popup trasformazione
+    const transformBtn = document.getElementById("btnTransform");
+    const popup = document.getElementById("mitomanePopup");
+    const popupRoles = document.getElementById("popupRoles");
+    const closePopup = document.getElementById("btnClosePopup");
 
+    if (transformBtn) {
+      transformBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        popup.classList.remove("hidden");
+        popupRoles.innerHTML = "";
+        ROLES.filter(r => r.id !== "mitomane").forEach(r => {
+          const btn = document.createElement("button");
+          btn.className = "btn";
+          btn.innerText = r.label;
+          btn.addEventListener("click", () => {
+            popup.classList.add("hidden");
+            showMyRole(r);
+          });
+          popupRoles.appendChild(btn);
+        });
+      });
+    }
+    if (closePopup) closePopup.addEventListener("click", () => popup.classList.add("hidden"));
+
+    // termina partita
     document.getElementById("btnEndGame").addEventListener("click", async () => {
       if (!currentRoomId) return;
       await db.collection("rooms").doc(currentRoomId).update({ ended: true });
