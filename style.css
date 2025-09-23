@@ -12,10 +12,10 @@ body {
 
 /* ---- HEADER LOGO ---- */
 .app-header {
-  background-color: #1b263b   /* blu come nello screen */
+  background-color: #354C96;   /* colore blu chiaro */
   padding: 20px 0;
   text-align: center;
-  width: 100% !important;
+  width: 100%;
   position: fixed;
   z-index: 1000;
   border-radius: 0 0 12px 12px;
@@ -25,10 +25,8 @@ body {
   height: 40px;
   display: block;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #354C96;
+  background: #1b263b; /* tolto il colore qui */
 }
-
 /* ---- CARDS ---- */
 .card {
   background: #1b263b;
