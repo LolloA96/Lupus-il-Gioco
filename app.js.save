@@ -1,3 +1,11 @@
+
+cd ~/Downloads/"Lupus App" && echo '// app.js aggiornato
+PASTA QUI IL CODICE COMPLETO CHE TI HO DATO PRIMA
+' > app.js
+
+lorenzoanfora@Mac Lupus App %
+
+
 // app.js (versione aggiornata corretta con gestione host/player e fix Inizia Partita)
 
 let currentRoomId = null;
