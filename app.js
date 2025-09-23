@@ -129,6 +129,13 @@ function subscribeToRoom(roomId) {
     const data = doc.data();
     if (!data) return;
 
+    // setta host PRIMA di renderizzare la lista (così il pulsante di rimozione appare correttamente)
+    if (data.host && currentPlayerName) {
+      isHost = (data.host === currentPlayerName);
+    } else {
+      isHost = false;
+    }
+
     if (data.ended) {
       alert("La partita è terminata.");
       unsubscribeRoom();
@@ -136,10 +143,11 @@ function subscribeToRoom(roomId) {
       return;
     }
 
-    // 🔹 Rendering lista giocatori
+    // 🔹 Rendering lista giocatori (salviamo il nome pulito in data-name)
     playerList.innerHTML = "";
     (data.players || []).forEach(p => {
       const li = document.createElement("li");
+      li.dataset.name = p; // salva il nome pulito
 
       // avatar con iniziali
       const avatar = document.createElement("div");
@@ -154,12 +162,14 @@ function subscribeToRoom(roomId) {
       li.appendChild(avatar);
       li.appendChild(nameSpan);
 
-      // se sono host → pulsante rimuovi
+      // se sono host → pulsante rimuovi (non sul proprio nome)
       if (isHost && p !== currentPlayerName) {
         const removeBtn = document.createElement("button");
         removeBtn.className = "remove-player";
+        removeBtn.type = "button";
         removeBtn.innerHTML = "🗑️";
-        removeBtn.addEventListener("click", async () => {
+        removeBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
           try {
             await db.collection("rooms").doc(currentRoomId).update({
               players: firebase.firestore.FieldValue.arrayRemove(p)
@@ -174,14 +184,13 @@ function subscribeToRoom(roomId) {
       playerList.appendChild(li);
     });
 
-    // 🔹 Controllo ruoli e host
+    // 🔹 Controllo ruoli (se ci sono assignments e io ho un ruolo, mostro la mia carta)
     if (data.assignments && currentPlayerName) {
       const myRoleId = data.assignments[currentPlayerName];
-      if (myRoleId) showMyRoleById(myRoleId);
-    }
-
-    if (data.host && currentPlayerName) {
-      isHost = (data.host === currentPlayerName);
+      if (myRoleId) {
+        console.log("Snapshot: ho un ruolo, mostro la mia carta:", myRoleId);
+        showMyRoleById(myRoleId);
+      }
     }
   });
 }
@@ -276,7 +285,11 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
       return;
     }
 
-    const players = Array.from(document.querySelectorAll("#playerList li")).map(li => li.textContent);
+    // prendi i nomi puliti dai dataset delle li
+    const players = Array.from(document.querySelectorAll("#playerList li"))
+      .map(li => (li.dataset.name || li.textContent || "").trim())
+      .filter(n => n.length > 0);
+
     const playersCount = players.length;
 
     let totalSelected = 0;
@@ -291,29 +304,35 @@ document.getElementById("btnAssignRoles").addEventListener("click", async () => 
       return;
     }
 
+    // costruisci pool di roleId (ripeti roleId count volte)
     let pool = [];
     Object.keys(selectedCounts).forEach(roleId => {
       for (let i = 0; i < selectedCounts[roleId]; i++) pool.push(roleId);
     });
+
+    // mescola la pool
     pool = shuffleArray(pool);
 
+    // crea mapping player -> roleId (nell'ordine della lista)
     const assignments = {};
     for (let i = 0; i < playersCount; i++) {
       assignments[players[i]] = pool[i];
     }
 
+    // salva su Firestore
     const roomRef = db.collection("rooms").doc(currentRoomId);
     await roomRef.update({ assignments });
 
     console.log("Assignments saved:", assignments);
+    console.log("Io sono:", currentPlayerName, "Il mio ruolo:", assignments[currentPlayerName]);
 
-    // 🔹 Mostra schermata ruoli subito
-    showView(viewRoles);
-
-    // 🔹 Poi mostra la carta ruolo al giocatore
+    // Se il giocatore corrente ha un ruolo, mostra subito la sua carta (non fare redirect forzati)
     const myRoleId = assignments[currentPlayerName];
     if (myRoleId) {
       showMyRoleById(myRoleId);
+    } else {
+      // se non sei nella stanza per qualche motivo, torna alla view room
+      showView(viewRoom);
     }
 
   } catch (err) {
@@ -413,10 +432,13 @@ function showMyRole(role) {
   `;
   showView(viewRoleCard);
 
+  // toggle oscuramento anche su mobile (usiamo 'click' che funziona su touch)
   const cardInner = document.getElementById("roleCardInner");
-  cardInner.addEventListener("click", () => {
-    cardInner.classList.toggle("role-obscured");
-  });
+  if (cardInner) {
+    cardInner.addEventListener("click", () => {
+      cardInner.classList.toggle("role-obscured");
+    });
+  }
 
   const endBtn = document.getElementById("btnEndGame");
   if (endBtn) {
