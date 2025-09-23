@@ -355,12 +355,60 @@ function showMyRole(role) {
   `;
   showView(viewRoleCard);
 
-  // Eventi bottoni
-  if (role.id === "mitomane") {
-    document.getElementById("btnTransform").addEventListener("click", () => {
-      alert("Funzione di trasformazione in sviluppo!");
+  // --- MITOMANE ---
+if (role.id === "mitomane") {
+  roleCard.innerHTML = `
+    <div class="role-container">
+      <div class="role-card-top" style="background:${bgColor}">
+        <img src="${role.img}" alt="${role.label}" />
+      </div>
+      <div class="role-card-bottom" style="background:${bgColor}">
+        <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
+        <p>${role.description}</p>
+      </div>
+      <div class="role-actions">
+        <button id="btnTransform" class="btn primary">Trasformati</button>
+        <button id="btnEndGame" class="btn secondary">Termina partita</button>
+      </div>
+    </div>
+  `;
+  showView(viewRoleCard);
+
+  // --- TRASFORMAZIONE MITOMANE ---
+  document.getElementById("btnTransform").addEventListener("click", async () => {
+    const snapshot = await db.collection("rooms").doc(currentRoomId).get();
+    const data = snapshot.data();
+    if (!data || !data.assignments) return;
+
+    // Lista giocatori tra cui scegliere
+    const otherPlayers = Object.keys(data.assignments).filter(p => p !== currentPlayerName);
+
+    if (otherPlayers.length === 0) {
+      alert("Non ci sono altri giocatori da imitare!");
+      return;
+    }
+
+    // Mostra un prompt per scegliere
+    const chosen = prompt(`Scegli un giocatore da imitare:\n${otherPlayers.join(", ")}`);
+    if (!chosen || !otherPlayers.includes(chosen)) {
+      alert("Scelta non valida!");
+      return;
+    }
+
+    // Copia il ruolo del giocatore scelto
+    const chosenRole = data.assignments[chosen];
+    if (!chosenRole) {
+      alert("Quel giocatore non ha ancora un ruolo.");
+      return;
+    }
+
+    // Aggiorna il DB: il mitomane diventa il ruolo scelto
+    await db.collection("rooms").doc(currentRoomId).update({
+      [`assignments.${currentPlayerName}`]: chosenRole
     });
-  }
+
+    alert(`Ti sei trasformato! Ora sei un ${chosenRole.toUpperCase()}.`);
+  });
 
   document.getElementById("btnEndGame").addEventListener("click", async () => {
     if (!currentRoomId) return;
@@ -368,8 +416,8 @@ function showMyRole(role) {
     showView(viewHome);
   });
 
-  document.getElementById("btnCancelGameRole").addEventListener("click", cancelGame);
-}
+  return;
+}}
 
 // --- UTILITY: shuffle ---
 function shuffleArray(array) {
