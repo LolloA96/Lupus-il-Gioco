@@ -240,3 +240,52 @@ body {
   font-size: 1rem;
   padding: 0.9rem 1.2rem;
 }
+
+/* Card superiore (immagine + titolo) */
+.role-card-top {
+  border-radius: 12px 12px 0 0;
+  padding: 1.5rem;
+  text-align: center;
+  color: #fff;
+}
+.role-card-top img {
+  width: 120px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+.role-name-card {
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+/* Card inferiore (descrizione) */
+.role-card-bottom {
+  border-radius: 0 0 12px 12px;
+  padding: 1.2rem;
+  text-align: center;
+  color: #fff;
+  margin-top: -8px; /* per unire meglio le due card */
+}
+.role-card-bottom p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+/* Azioni */
+.role-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+.role-actions .btn {
+  width: 100%;
+  padding: 0.9rem;
+  border-radius: 24px;
+  font-weight: bold;
+}
+.btn.secondary {
+  background: transparent;
+  border: 2px solid #fbbf24;
+  color: #fbbf24;
+}

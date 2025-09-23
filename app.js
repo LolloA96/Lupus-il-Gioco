@@ -1,4 +1,4 @@
-// app.js (versione aggiornata con gestione host/player, fix Inizia Partita, ruolo nascosto e header logo)
+// app.js (versione aggiornata con gestione host/player, fix Inizia Partita, ruolo nascosto, header logo e UI ruoli a due card)
 
 let currentRoomId = null;
 let currentPlayerName = null;
@@ -316,88 +316,66 @@ function showMyRoleById(roleId) {
   showMyRole(role);
 }
 
-// --- MOSTRA CARTA RUOLO ---
+// --- MOSTRA CARTA RUOLO (NUOVA VERSIONE) ---
 function showMyRole(role) {
   const roleCard = document.getElementById("viewRoleCard");
+
+  // Palette colori
+  const ROLE_COLORS = {
+    lupo: { primary: "#5C2E2E", secondary: "#A84242" },
+    contadino: { primary: "#2E5C3A", secondary: "#42A85C" },
+    comandante: { primary: "#2E3C5C", secondary: "#4269A8" },
+    veggente: { primary: "#5C3C5C", secondary: "#A842A8" },
+    mitomane: { primary: "#5C4C2E", secondary: "#A87C42" },
+    strega: { primary: "#3C2E5C", secondary: "#6C42A8" }
+  };
+
+  const colors = ROLE_COLORS[role.id] || { primary: "#1b263b", secondary: "#354C96" };
 
   // --- MITOMANE ---
   if (role.id === "mitomane") {
     roleCard.innerHTML = `
-      <div id="roleCardInner" class="role-container role-${role.id}">
-        <div class="role-image">
+      <div class="role-container">
+        <div class="role-card-top" style="background:${colors.primary}">
           <img src="${role.img}" alt="${role.label}" />
-          <div class="role-hidden active">
-            <div class="role-hidden-box">
-              <img src="img/lock.png" alt="locked" style="width:60px; margin-bottom:10px;" />
-              <div class="role-hidden-text">Ruolo nascosto</div>
-            </div>
-          </div>
+          <h2 class="role-name-card">${role.label.toUpperCase()}</h2>
         </div>
-        <h2 class="role-title">${role.label.toUpperCase()}</h2>
-        <div class="role-description"><p>${role.description}</p></div>
+        <div class="role-card-bottom" style="background:${colors.secondary}">
+          <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
+          <p>${role.description}</p>
+        </div>
         <div class="role-actions">
-          <button id="btnTransform" class="btn primary" type="button">Trasformati</button>
-        </div>
-      </div>
-
-      <div id="mitomanePopup" class="popup hidden">
-        <div class="popup-content">
-          <h3>Scegli il personaggio in cui trasformarti</h3>
-          <div id="popupRoles"></div>
-          <button id="btnClosePopup" class="btn" type="button">Chiudi</button>
+          <button id="btnTransform" class="btn primary">Trasformati</button>
+          <button id="btnEndGame" class="btn secondary">Termina partita</button>
         </div>
       </div>
     `;
     showView(viewRoleCard);
 
-    const cardInner = document.getElementById("roleCardInner");
-    const hiddenBox = cardInner.querySelector(".role-hidden");
-    cardInner.addEventListener("click", (e) => {
-      if (e.target.id === "btnTransform") return;
-      hiddenBox.classList.toggle("active");
+    document.getElementById("btnTransform").addEventListener("click", () => {
+      alert("Funzione di trasformazione in sviluppo!");
     });
 
-    const transformBtn = document.getElementById("btnTransform");
-    const popup = document.getElementById("mitomanePopup");
-    const popupRoles = document.getElementById("popupRoles");
-    const closePopup = document.getElementById("btnClosePopup");
-
-    if (transformBtn) {
-      transformBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        popup.classList.remove("hidden");
-        popupRoles.innerHTML = "";
-        ROLES.filter(r => r.id !== "mitomane").forEach(r => {
-          const btn = document.createElement("button");
-          btn.className = "btn";
-          btn.innerText = r.label;
-          btn.addEventListener("click", () => {
-            popup.classList.add("hidden");
-            showMyRole(r);
-          });
-          popupRoles.appendChild(btn);
-        });
-      });
-    }
-    if (closePopup) closePopup.addEventListener("click", () => popup.classList.add("hidden"));
+    document.getElementById("btnEndGame").addEventListener("click", async () => {
+      if (!currentRoomId) return;
+      await db.collection("rooms").doc(currentRoomId).update({ ended: true });
+      showView(viewHome);
+    });
 
     return;
   }
 
   // --- RUOLI NORMALI ---
   roleCard.innerHTML = `
-    <div id="roleCardInner" class="role-container role-${role.id}">
-      <div class="role-image">
+    <div class="role-container">
+      <div class="role-card-top" style="background:${colors.primary}">
         <img src="${role.img}" alt="${role.label}" />
-        <div class="role-hidden active">
-          <div class="role-hidden-box">
-            <img src="img/lock.png" alt="locked" style="width:60px; margin-bottom:10px;" />
-            <div class="role-hidden-text">Ruolo nascosto</div>
-          </div>
-        </div>
+        <h2 class="role-name-card">${role.label.toUpperCase()}</h2>
       </div>
-      <h2 class="role-title">${role.label.toUpperCase()}</h2>
-      <div class="role-description"><p>${role.description}</p></div>
+      <div class="role-card-bottom" style="background:${colors.secondary}">
+        <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
+        <p>${role.description}</p>
+      </div>
       <div class="role-actions">
         <button id="btnEndGame" class="btn primary">Termina partita</button>
       </div>
@@ -405,29 +383,11 @@ function showMyRole(role) {
   `;
   showView(viewRoleCard);
 
-  const cardInner = document.getElementById("roleCardInner");
-  const hiddenBox = cardInner.querySelector(".role-hidden");
-  cardInner.addEventListener("click", (e) => {
-    if (e.target.id === "btnEndGame") return;
-    hiddenBox.classList.toggle("active");
+  document.getElementById("btnEndGame").addEventListener("click", async () => {
+    if (!currentRoomId) return;
+    await db.collection("rooms").doc(currentRoomId).update({ ended: true });
+    showView(viewHome);
   });
-
-  const endBtn = document.getElementById("btnEndGame");
-  if (endBtn) {
-    endBtn.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      if (!currentRoomId) return;
-      try {
-        await db.collection("rooms").doc(currentRoomId).update({
-          ended: true,
-          endedAt: Date.now(),
-          endedBy: currentPlayerName || null
-        });
-      } catch (err) {
-        console.error("Errore nel terminare la partita:", err);
-      }
-    });
-  }
 }
 
 // --- UTILITY: shuffle ---
