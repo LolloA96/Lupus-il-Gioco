@@ -332,56 +332,84 @@ function showMyRole(role) {
 
   const bgColor = ROLE_COLORS[role.id] || "#1b263b";
 
-  // --- MITOMANE ---
-  if (role.id === "mitomane") {
-    roleCard.innerHTML = `
-      <div class="role-container">
-        <div class="role-card-top" style="background:${bgColor}">
-          <img src="${role.img}" alt="${role.label}" />
-        </div>
-        <div class="role-card-bottom" style="background:${bgColor}">
-          <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
-          <p>${role.description}</p>
-        </div>
-        <div class="role-actions">
-          <button id="btnTransform" class="btn primary">Trasformati</button>
-          <button id="btnEndGame" class="btn secondary">Termina partita</button>
-        </div>
+// --- MITOMANE ---
+if (role.id === "mitomane") {
+  roleCard.innerHTML = `
+    <div class="role-container">
+      <div class="role-card-top" style="background:${bgColor}">
+        <img src="${role.img}" alt="${role.label}" />
       </div>
-    `;
-    showView(viewRoleCard);
+      <div class="role-card-bottom" style="background:${bgColor}">
+        <p><strong>Sei il ${role.label.toUpperCase()}!</strong></p>
+        <p>${role.description}</p>
+      </div>
+      <div class="role-actions">
+        <button id="btnTransform" class="btn primary">Trasformati</button>
+        <button id="btnEndGame" class="btn secondary">Termina partita</button>
+      </div>
+    </div>
+  `;
+  showView(viewRoleCard);
 
-    // --- TRASFORMAZIONE MITOMANE ---
-    document.getElementById("btnTransform").addEventListener("click", async () => {
-      const snapshot = await db.collection("rooms").doc(currentRoomId).get();
-      const data = snapshot.data();
-      if (!data || !data.assignments) return;
+  const popup = document.getElementById("popupTransform");
+  const choicesContainer = document.getElementById("transformChoices");
 
-      const otherPlayers = Object.keys(data.assignments).filter(p => p !== currentPlayerName);
+  // Apri popup alla pressione di Trasformati
+  document.getElementById("btnTransform").addEventListener("click", async () => {
+    const snapshot = await db.collection("rooms").doc(currentRoomId).get();
+    const data = snapshot.data();
+    if (!data || !data.assignments) return;
 
-      if (otherPlayers.length === 0) {
-        alert("Non ci sono altri giocatori da imitare!");
-        return;
-      }
+    const otherPlayers = Object.keys(data.assignments).filter(p => p !== currentPlayerName);
+    if (otherPlayers.length === 0) {
+      alert("Non ci sono altri giocatori da imitare!");
+      return;
+    }
 
-      const chosen = prompt(`Scegli un giocatore da imitare:\n${otherPlayers.join(", ")}`);
-      if (!chosen || !otherPlayers.includes(chosen)) {
-        alert("Scelta non valida!");
-        return;
-      }
+    // Mostra popup
+    popup.classList.remove("hidden");
+    choicesContainer.innerHTML = "";
 
-      const chosenRole = data.assignments[chosen];
-      if (!chosenRole) {
-        alert("Quel giocatore non ha ancora un ruolo.");
-        return;
-      }
+    // Ruoli trasformabili (solo quelli già assegnati ad altri giocatori)
+    otherPlayers.forEach(p => {
+      const r = data.assignments[p];
+      const roleData = ROLES.find(ro => ro.id === r);
+      if (!roleData) return;
 
-      await db.collection("rooms").doc(currentRoomId).update({
-        [`assignments.${currentPlayerName}`]: chosenRole
+      const btn = document.createElement("button");
+      btn.className = `btn-${roleData.id}`;
+      btn.innerHTML = `<strong>${roleData.label.toUpperCase()}</strong><br><span>Sei il ${roleData.label.toUpperCase()}!</span>`;
+      
+      btn.addEventListener("click", async () => {
+        await db.collection("rooms").doc(currentRoomId).update({
+          [`assignments.${currentPlayerName}`]: roleData.id
+        });
+        popup.classList.add("hidden");
+        alert(`Ti sei trasformato! Ora sei un ${roleData.label.toUpperCase()}.`);
       });
 
-      alert(`Ti sei trasformato! Ora sei un ${chosenRole.toUpperCase()}.`);
+      choicesContainer.appendChild(btn);
     });
+  });
+
+  // Chiudi popup
+  document.getElementById("btnClosePopup").addEventListener("click", () => {
+    popup.classList.add("hidden");
+  });
+
+  // Termina partita
+  document.getElementById("btnEndGame").addEventListener("click", async () => {
+    if (!currentRoomId) return;
+    await db.collection("rooms").doc(currentRoomId).update({
+      ended: true,
+      endedAt: Date.now(),
+      endedBy: currentPlayerName || null
+    });
+    showView(viewHome);
+  });
+
+  return;
+}
 
     // --- TERMINE PARTITA ---
     document.getElementById("btnEndGame").addEventListener("click", async () => {
