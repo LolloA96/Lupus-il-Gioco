@@ -4,24 +4,24 @@ body {
   font-family: Arial, sans-serif;
   background: #0d1b2a;
   color: #fff;
+  margin-top: 76px; /* spazio per l’header fisso */
 }
 
 .container {
   padding: 1rem;
 }
 
-/* ...existing code... */
-
-/* header / logo */
+/* ---- HEADER LOGO ---- */
 .app-header {
-  background-color: #243c84;
-  padding: 18px 0;
+  background-color: #243c84;   /* blu come nello screen */
+  padding: 20px 0;
   text-align: center;
-  width: 100vw;
+  width: 100%;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
+  border-radius: 0 0 12px 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
@@ -31,14 +31,7 @@ body {
   margin: 0 auto;
 }
 
-/* Spazio sotto l'header per evitare che il contenuto venga coperto */
-body {
-  margin-top: 76px; /* uguale o maggiore dell'altezza dell'header */
-}
-
-/* ...existing code... */
-
-/* generic card */
+/* ---- CARDS ---- */
 .card {
   background: #1b263b;
   border-radius: 12px;
@@ -162,7 +155,6 @@ body {
 .role-image { position:relative; width:100%; display:flex; align-items:center; justify-content:center; padding: 12px 0; }
 .role-image img { width:160px; height:auto; display:block; border-radius:12px; }
 
-/* overlay "Ruolo nascosto" (posizionato sopra immagine, apparirà quando role-obscured è attivo) */
 .role-hidden {
   position:absolute;
   inset:0;
@@ -179,7 +171,6 @@ body {
   border-radius: 12px;
 }
 
-/* Title / description */
 .role-title { font-size:1.8rem; font-weight:bold; color:white; margin:0.5rem 0; text-align:center; background:rgba(0,0,0,0.15); padding:0.5rem 1rem; border-radius:8px; }
 .role-description { width:100%; text-align:left; font-size:0.95rem; background:rgba(255,255,255,0.12); padding:1rem; border-radius:8px; margin-top:1rem; }
 .role-description p:first-child { font-weight:bold; margin-bottom:0.5rem; }
@@ -189,24 +180,6 @@ body {
 .role-actions .btn { flex:1; padding:0.8rem; border-radius:24px; font-size:1rem; }
 .role-actions .btn.primary { background:#f4a261; color:#fff; }
 .role-actions .btn:not(.primary) { background:transparent; border:2px solid #f4a261; color:#f4a261; }
-
-/* specific role colors (for whole card background if desired) */
-.role-lupo { background: #3B5998; }
-.role-contadino { background: #8B2F2F; }
-.role-comandante { background: #B8860B; }
-.role-veggente { background: #B565A7; }
-.role-mitomane { background: #2E8B57; }
-.role-strega { background: #2F6B2F; }
-
-/* ---- 'oscuramento' stato ---- */
-.role-obscured {
-  filter: brightness(0.12) blur(2px);
-  color: transparent !important;
-  position: relative;
-}
-
-/* quando la card è oscurata mostriamo overlay dentro .role-hidden */
-.role-obscured .role-hidden { opacity: 1; pointer-events: auto; }
 
 /* popup */
 .popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; z-index:100; }
@@ -220,20 +193,4 @@ body {
   .home-card { padding:1.2rem; }
   .role-card img { width:120px; }
   .role-image img { width:140px; }
-}
-
-.role-hidden-box {
-  background: #3b4f9c;  /* blu come nello screenshot */
-  border-radius: 16px;
-  padding: 40px 20px;
-  width: 90%;
-  max-width: 400px;
-  margin: 0 auto 20px auto;
-  text-align: center;
-}
-
-.role-hidden-text {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #ffffff;
 }
