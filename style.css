@@ -465,6 +465,6 @@ body {
 
 .app-header {
   background-color: #243c84 !important; /* blu header */
-  padding: 40px;
+  padding: 40px !important;
   text-align: center;
 }
