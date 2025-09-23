@@ -439,3 +439,25 @@ function shuffleArray(array) {
   }
   return a;
 }
+
+// --- ANNULLA PARTITA ---
+async function cancelGame() {
+  if (!currentRoomId) return;
+  try {
+    await db.collection("rooms").doc(currentRoomId).delete();
+    unsubscribeRoom();
+    currentRoomId = null;
+    currentPlayerName = null;
+    isHost = false;
+    alert("La partita è stata annullata.");
+    showView(viewHome);
+  } catch (err) {
+    console.error("Errore nell'annullare la partita:", err);
+  }
+}
+
+// Listener da schermata RUOLI
+document.getElementById("btnCancelGameRoles")?.addEventListener("click", cancelGame);
+
+// Listener da schermata ROOM
+document.getElementById("btnCancelGameRoom")?.addEventListener("click", cancelGame);

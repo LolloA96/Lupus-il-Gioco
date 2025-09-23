@@ -5,37 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lupus - Gioca con gli amici</title>
 
-  <!-- Favicon standard per browser desktop -->
-<link rel="icon" type="image/png" href="favicon.png" />
-
-<!-- Icona per iPhone/iPad (usa sempre favicon.png) -->
-<link rel="apple-touch-icon" href="icon.png" />
-<link rel="apple-touch-icon" sizes="152x152" href="icon.png" />
-<link rel="apple-touch-icon" sizes="167x167" href="icon.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="icon.png" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="icon.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png" />
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div id="root" class="root">
-    <!-- TOP BAR -->
-    <header>
-  <img src="img/Logo.png" alt="Lupus Logo" class="logo-header">
-</header>
+    <header class="app-header">
+      <img src="img/Logo.png" alt="Logo Lupus" class="logo-header" />
+    </header>
 
-    <!-- VIEWS -->
     <main class="container">
-      
       <!-- HOME -->
       <section id="viewHome" class="home-container">
         <h1 class="home-title">Benvenuto,</h1>
         <p class="home-subtitle">Inizia subito una partita</p>
 
-        <!-- Crea una partita -->
         <div class="home-card">
           <h2 class="home-card-title">Crea una partita</h2>
           <input type="text" id="inputRoomNameCreate" placeholder="Nome della stanza" />
@@ -43,7 +35,6 @@
           <button id="btnCreate" class="btn primary">Inizia la tua partita</button>
         </div>
 
-        <!-- Entra in una stanza -->
         <div class="home-card">
           <h2 class="home-card-title">Entra in una stanza</h2>
           <input type="text" id="inputRoomId" placeholder="Nome della stanza" />
@@ -53,37 +44,36 @@
       </section>
 
       <!-- STANZA -->
-      <section id="viewRoom" class="view card hidden">
-        <h2 id="roomTitle">Benvenuto nella stanza</h2>
-        <ul id="playerList"></ul>
-        <button id="btnStartGame" class="btn primary">Inizia partita</button>
+      <section id="viewRoom" class="room-container hidden">
+        <h2 class="room-title">Benvenuto nella stanza</h2>
+        <p class="room-subtitle">Nome della stanza:<br><span id="roomTitle"></span></p>
+
+        <ul id="playerList" class="player-list"></ul>
+
+        <button id="btnStartGame" class="btn primary room-start-btn">Inizia Partita</button>
+
+        <div class="floating-actions">
+          <button id="btnCancelGameRoom" class="btn">Annulla Partita</button>
+        </div>
       </section>
-      <!-- VIEW ROOM -->
-<div id="viewRoom" class="hidden room-container">
-  <h2 class="room-title">Benvenuto nella stanza</h2>
-  <p class="room-subtitle">Nome della stanza:<br><span id="roomTitle"></span></p>
-
-  <ul id="playerList" class="player-list"></ul>
-
-  <button id="btnStartGame" class="btn primary room-start-btn">Inizia Partita</button>
-</div>
 
       <!-- SCELTA PERSONAGGI -->
       <section id="viewRoles" class="view card hidden">
         <h2>Tutti i personaggi</h2>
         <p>Scegli i personaggi per la tua partita</p>
         <div id="rolesContainer" class="roles-grid"></div>
-        <button id="btnAssignRoles" class="btn primary">Assegna ruoli</button>
+
+        <div class="floating-actions">
+          <button id="btnAssignRoles" class="btn primary">Assegna ruoli</button>
+          <button id="btnCancelGameRoles" class="btn">Annulla Partita</button>
+        </div>
       </section>
 
       <!-- CARTA RUOLO -->
-      <section id="viewRoleCard" class="view card hidden">
-        <!-- JS inserirà il contenuto dinamicamente -->
-      </section>
+      <section id="viewRoleCard" class="view card hidden"></section>
     </main>
   </div>
 
-  <!-- Config e logica -->
   <script src="./firebase-config.js"></script>
   <script src="./app.js"></script>
 </body>
