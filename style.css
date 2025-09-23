@@ -219,26 +219,31 @@ body {
 .role-hidden.active { opacity: 1; }
 .role-hidden:not(.active) { opacity: 0; pointer-events: none; }
 
-/* --- Floating buttons --- */
-.floating-actions {
+/* contenitore bottoni fluttuanti */
+.role-actions {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(0,0,0,0.2); /* overlay nero 20% */
-  padding: 1rem;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  gap: 1rem;
-  justify-content: center;
-  z-index: 2000;
+  gap: 12px;
+  padding: 12px 20px;
+  
+  background: rgba(0, 0, 0, 0.3);      /* nero trasparente */
+  backdrop-filter: blur(10px);          /* effetto vetro */
+  -webkit-backdrop-filter: blur(10px);  /* compatibilità Safari */
+  
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  z-index: 999;
 }
 
-.floating-actions .btn {
-  flex: 1;
-  max-width: 220px;
-  border-radius: 24px;
-  font-size: 1rem;
-  padding: 0.9rem 1.2rem;
+/* i bottoni dentro rimangono come prima */
+.role-actions .btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* Card superiore (immagine + titolo) */
