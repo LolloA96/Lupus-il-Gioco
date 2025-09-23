@@ -316,7 +316,7 @@ function showMyRoleById(roleId) {
   showMyRole(role);
 }
 
-// --- MOSTRA CARTA RUOLO (Ruolo nascosto per tutti, logica speciale per Mitomane) ---
+// --- MOSTRA CARTA RUOLO ---
 function showMyRole(role) {
   const roleCard = document.getElementById("viewRoleCard");
 
@@ -324,8 +324,14 @@ function showMyRole(role) {
   if (role.id === "mitomane") {
     roleCard.innerHTML = `
       <div id="roleCardInner" class="role-container role-${role.id}">
-        <div class="role-hidden-box">
-          <p class="role-hidden-text">Ruolo nascosto</p>
+        <div class="role-image">
+          <img src="${role.img}" alt="${role.label}" />
+          <div class="role-hidden active">
+            <div class="role-hidden-box">
+              <img src="img/lock.png" alt="locked" style="width:60px; margin-bottom:10px;" />
+              <div class="role-hidden-text">Ruolo nascosto</div>
+            </div>
+          </div>
         </div>
         <h2 class="role-title">${role.label.toUpperCase()}</h2>
         <div class="role-description"><p>${role.description}</p></div>
@@ -344,13 +350,21 @@ function showMyRole(role) {
     `;
     showView(viewRoleCard);
 
+    const cardInner = document.getElementById("roleCardInner");
+    const hiddenBox = cardInner.querySelector(".role-hidden");
+    cardInner.addEventListener("click", (e) => {
+      if (e.target.id === "btnTransform") return;
+      hiddenBox.classList.toggle("active");
+    });
+
     const transformBtn = document.getElementById("btnTransform");
     const popup = document.getElementById("mitomanePopup");
     const popupRoles = document.getElementById("popupRoles");
     const closePopup = document.getElementById("btnClosePopup");
 
     if (transformBtn) {
-      transformBtn.addEventListener("click", () => {
+      transformBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
         popup.classList.remove("hidden");
         popupRoles.innerHTML = "";
         ROLES.filter(r => r.id !== "mitomane").forEach(r => {
@@ -365,18 +379,25 @@ function showMyRole(role) {
         });
       });
     }
-    if (closePopup) {
-      closePopup.addEventListener("click", () => popup.classList.add("hidden"));
-    }
+    if (closePopup) closePopup.addEventListener("click", () => popup.classList.add("hidden"));
+
     return;
   }
 
   // --- RUOLI NORMALI ---
   roleCard.innerHTML = `
     <div id="roleCardInner" class="role-container role-${role.id}">
-      <div class="role-hidden-box">
-        <p class="role-hidden-text">Ruolo nascosto</p>
+      <div class="role-image">
+        <img src="${role.img}" alt="${role.label}" />
+        <div class="role-hidden active">
+          <div class="role-hidden-box">
+            <img src="img/lock.png" alt="locked" style="width:60px; margin-bottom:10px;" />
+            <div class="role-hidden-text">Ruolo nascosto</div>
+          </div>
+        </div>
       </div>
+      <h2 class="role-title">${role.label.toUpperCase()}</h2>
+      <div class="role-description"><p>${role.description}</p></div>
       <div class="role-actions">
         <button id="btnEndGame" class="btn primary">Termina partita</button>
       </div>
@@ -384,9 +405,17 @@ function showMyRole(role) {
   `;
   showView(viewRoleCard);
 
+  const cardInner = document.getElementById("roleCardInner");
+  const hiddenBox = cardInner.querySelector(".role-hidden");
+  cardInner.addEventListener("click", (e) => {
+    if (e.target.id === "btnEndGame") return;
+    hiddenBox.classList.toggle("active");
+  });
+
   const endBtn = document.getElementById("btnEndGame");
   if (endBtn) {
-    endBtn.addEventListener("click", async () => {
+    endBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
       if (!currentRoomId) return;
       try {
         await db.collection("rooms").doc(currentRoomId).update({
