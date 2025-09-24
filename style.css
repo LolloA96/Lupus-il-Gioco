@@ -148,10 +148,10 @@ body {
 .role-container { display:flex; flex-direction:column; align-items:center; padding:1rem; border-radius:16px; width:90%; margin:0 auto; background:#1b263b; position:relative; }
 
 .role-card-top { border-radius: 12px;; padding:1.5rem; text-align:center; margin-bottom: 24px; width: 100%; color:#fff; }
-.role-card-top img { width: 300px;px; height:auto; margin-bottom:1rem; }
+.role-card-top img { width: 300px; height:auto; margin-bottom:1rem; }
 .role-name-card { font-size:1.6rem; font-weight:bold; }
 
-.role-card-bottom { border-radius: 12px; padding: 1.5em;rem; text-align:center; color:#fff; width: 100%;  }
+.role-card-bottom { border-radius: 12px; padding: 1.5rem; text-align:center; color:#fff; width: 100%;  }
 .role-card-bottom p { margin:0.5rem 0; font-size:1rem; }
 
 .role-description p:first-child { font-weight:bold; margin-bottom:0.5rem; }
