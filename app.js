@@ -440,7 +440,7 @@ ROLES.forEach(role => {
           if (newRole) showMyRole(newRole);
         });
         options.appendChild(btn);
-      });
+      };
 
       document.getElementById("mitoCloseBtn").addEventListener("click", () => {
         const el = document.getElementById("mitoPopupCustom");
