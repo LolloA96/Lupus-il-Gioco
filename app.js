@@ -348,6 +348,10 @@ if (ruoliView) {
   // nascondo il bottone statico originale (se presente nel markup) per evitare confusione
   const staticAssign = document.getElementById("btnAssignRoles");
   if (staticAssign) staticAssign.style.display = "none";
+
+  const staticCancel = document.getElementById("btnCancelGameRoles");
+if (staticCancel) staticCancel.remove();
+
 }
 
 // aggiorna numeri
