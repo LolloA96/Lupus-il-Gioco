@@ -408,17 +408,9 @@ function showMyRole(role) {
       const data = snapshot.data();
       if (!data || !data.assignments) return;
 
-      // Lista giocatori tra cui scegliere (escludo me)
-      const otherPlayers = Object.keys(data.assignments).filter(p => p !== currentPlayerName);
-
-      if (otherPlayers.length === 0) {
-        alert("Non ci sono altri giocatori da imitare!");
-        return;
-      }
-
       // Mostro un popup semplice (puoi sostituirlo con UI più carina)
-      // Qui creiamo una lista modale dinamica (più simile a quello che chiedi)
-      ROLES.forEach(role => {
+// Qui creiamo una lista modale dinamica dei ruoli
+ROLES.forEach(role => {
   const btn = document.createElement("button");
   btn.className = "btn";
   btn.style.display = "block";
@@ -435,6 +427,7 @@ function showMyRole(role) {
   });
   options.appendChild(btn);
 });
+
 
           // aggiorna il DB: il mitomane assume il ruolo scelto
           await db.collection("rooms").doc(currentRoomId).update({
