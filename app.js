@@ -418,30 +418,24 @@ function showMyRole(role) {
 
       // Mostro un popup semplice (puoi sostituirlo con UI più carina)
       // Qui creiamo una lista modale dinamica (più simile a quello che chiedi)
-      const popup = document.createElement("div");
-      popup.className = "popup";
-      popup.id = "mitoPopupCustom";
-      popup.innerHTML = `
-        <div class="popup-content">
-          <h3>Trasformazione Mitomane</h3>
-          <p>Scegli il ruolo che vuoi assumere. Questa scelta è irreversibile!</p>
-          <div id="mitoOptions"></div>
-          <button id="mitoCloseBtn" class="btn">Chiudi</button>
-        </div>
-      `;
-      document.body.appendChild(popup);
+      ROLES.forEach(role => {
+  const btn = document.createElement("button");
+  btn.className = "btn";
+  btn.style.display = "block";
+  btn.style.width = "100%";
+  btn.style.margin = "8px 0";
+  btn.textContent = role.label.toUpperCase();
+  btn.addEventListener("click", async () => {
+    await db.collection("rooms").doc(currentRoomId).update({
+      [`assignments.${currentPlayerName}`]: role.id
+    });
+    document.body.removeChild(popup);
+    alert(`Ti sei trasformato! Ora hai il ruolo di ${role.label.toUpperCase()}.`);
+    showMyRole(role);
+  });
+  options.appendChild(btn);
+});
 
-      const options = document.getElementById("mitoOptions");
-      otherPlayers.forEach(p => {
-        const roleId = data.assignments[p];
-        const r = ROLES.find(rr => rr.id === roleId);
-        const btn = document.createElement("button");
-        btn.className = "btn";
-        btn.style.display = "block";
-        btn.style.width = "100%";
-        btn.style.margin = "8px 0";
-        btn.textContent = `${r ? r.label.toUpperCase() : roleId} — ${p}`;
-        btn.addEventListener("click", async () => {
           // aggiorna il DB: il mitomane assume il ruolo scelto
           await db.collection("rooms").doc(currentRoomId).update({
             [`assignments.${currentPlayerName}`]: roleId
