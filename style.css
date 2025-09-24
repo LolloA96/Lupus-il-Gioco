@@ -158,26 +158,20 @@ body {
 
 /* ---- BOTTONI FLOTANTI (effetto vetro) ---- */
 .role-actions {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
+  
   transform: translateX(-50%);
   display: flex;
   gap: 12px;
-  padding: 12px 20px;
-
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  padding-top: 20px;
+  border-radius: 20px;
   z-index: 999;
+  width: 100%;
 }
 .role-actions .btn {
-  padding: 10px 18px;
+  padding: 20px;
   border-radius: 10px;
   font-weight: 600;
+  width: 100% !important;
   cursor: pointer;
 }
 .role-actions .btn.primary { background:#fbbf24; color:#000; }
