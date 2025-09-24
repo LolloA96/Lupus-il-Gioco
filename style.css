@@ -158,8 +158,6 @@ body {
 
 /* ---- BOTTONI FLOTANTI (effetto vetro) ---- */
 .role-actions {
-  
-  transform: translateX(-50%);
   display: flex;
   gap: 12px;
   padding-top: 20px;
