@@ -198,12 +198,12 @@ btnStartGame.addEventListener("click", () => {
 
 // --- RUOLI DISPONIBILI ---
 const ROLES = [
-  { id: "lupo", label: "Lupo", description: "Mangia tutti gli altri giocatori per vincere!", img: "img/lupo.png" },
-  { id: "contadino", label: "Contadino", description: "Scova tutti i lupi all’interno del villaggio!", img: "img/contadino.png" },
-  { id: "comandante", label: "Comandante", description: "Proteggi una persona a tua scelta ogni notte. Può salvare anche se stesso per una notte.", img: "img/comandante.png" },
-  { id: "veggente", label: "Veggente", description: "Scopri i lupi per aiutare il villaggio.", img: "img/veggente.png" },
-  { id: "mitomane", label: "Mitomane", description: "Indica un giocatore e ne prende i poteri (il potere vale solo ad inizio partita).", img: "img/mitomane.png" },
-  { id: "strega", label: "Strega", description: "Scopri chi è il lupo e resuscita una persona (i poteri potranno essere usati dalla seconda notte).", img: "img/strega.png" }
+  { id: "lupo", label: "Lupo", description: "Il tuo ruolo è quello di mangiare tutti gli altri giocatori per poter vincere la partita!", img: "img/lupo.png" },
+  { id: "contadino", label: "Contadino", description: "Il tuo ruolo è quello di scovare tutti i lupi all’interno del villaggio!", img: "img/contadino.png" },
+  { id: "comandante", label: "Comandante", description: "Il tuo ruolo è quello di proteggere una persona a tua scelta ogni notte. Puoi salvare anche te stesso per una notte.", img: "img/comandante.png" },
+  { id: "veggente", label: "Veggente", description: "Il tuo ruolo è quello di scoprire i lupi per poi aiutare il villaggio ad ucciderlo.", img: "img/veggente.png" },
+  { id: "mitomane", label: "Mitomane", description: "Il tuo ruolo è quello di indicare un giocatore a sua scelta e ne prende i poteri (il potere vale solo ad inizio partita).", img: "img/mitomane.png" },
+  { id: "strega", label: "Strega", description: "Il tuo ruolo è quello di scoprire chi è il lupo e resuscitare una persona (i poteri potranno essere usati dalla seconda notte).", img: "img/strega.png" }
 ];
 
 const selectedCounts = {};
