@@ -333,7 +333,7 @@ function renderRolesUI() {
   const cancelBtn = document.createElement("button");
   cancelBtn.id = "btnCancelGameRoles_floating";
   cancelBtn.className = "btn secondary";
-  cancelBtn.textContent = "Chiudi partita";
+  cancelBtn.textContent = "Annulla partita";
   cancelBtn.addEventListener("click", cancelGame);
 
   actions.appendChild(assignBtn);
