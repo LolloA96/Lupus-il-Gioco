@@ -164,6 +164,7 @@ body {
   border-radius: 20px;
   z-index: 999;
   width: 100%;
+  flex-direction: column;
 }
 .role-actions .btn {
   padding: 20px;
