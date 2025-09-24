@@ -340,7 +340,10 @@ function renderRolesUI() {
   actions.appendChild(cancelBtn);
 
   // append su body così è sempre visibile/posizionato fixed
-  document.body.appendChild(actions);
+ const ruoliView = document.getElementById("viewRoles");
+if (ruoliView) {
+  ruoliView.appendChild(actions);
+}
 
   // nascondo il bottone statico originale (se presente nel markup) per evitare confusione
   const staticAssign = document.getElementById("btnAssignRoles");
