@@ -402,51 +402,52 @@ function showMyRole(role) {
     `;
     showView(viewRoleCard);
 
-    // --- TRASFORMAZIONE MITOMANE ---
-    document.getElementById("btnTransform").addEventListener("click", async () => {
-      const snapshot = await db.collection("rooms").doc(currentRoomId).get();
-      const data = snapshot.data();
-      if (!data || !data.assignments) return;
+   document.getElementById("btnTransform").addEventListener("click", async () => {
+  const snapshot = await db.collection("rooms").doc(currentRoomId).get();
+  const data = snapshot.data();
+  if (!data || !data.assignments) return;
 
-      // Mostro un popup semplice (puoi sostituirlo con UI più carina)
-// Qui creiamo una lista modale dinamica dei ruoli
-ROLES.forEach(role => {
-  const btn = document.createElement("button");
-  btn.className = "btn";
-  btn.style.display = "block";
-  btn.style.width = "100%";
-  btn.style.margin = "8px 0";
-  btn.textContent = role.label.toUpperCase();
-  btn.addEventListener("click", async () => {
-    await db.collection("rooms").doc(currentRoomId).update({
-      [`assignments.${currentPlayerName}`]: role.id
+  // Creo il popup
+  const popup = document.createElement("div");
+  popup.className = "popup";
+  popup.id = "mitoPopupCustom";
+  popup.innerHTML = `
+    <div class="popup-content">
+      <h3>Trasformazione Mitomane</h3>
+      <p>Scegli il ruolo che vuoi assumere. Questa scelta è irreversibile!</p>
+      <div id="mitoOptions"></div>
+      <button id="mitoCloseBtn" class="btn">Chiudi</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  const options = document.getElementById("mitoOptions");
+
+  // Creo i bottoni per ogni ruolo
+  ROLES.forEach(role => {
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.style.display = "block";
+    btn.style.width = "100%";
+    btn.style.margin = "8px 0";
+    btn.textContent = role.label.toUpperCase();
+    btn.addEventListener("click", async () => {
+      await db.collection("rooms").doc(currentRoomId).update({
+        [`assignments.${currentPlayerName}`]: role.id
+      });
+      document.body.removeChild(popup);
+      alert(`Ti sei trasformato! Ora hai il ruolo di ${role.label.toUpperCase()}.`);
+      showMyRole(role);
     });
-    document.body.removeChild(popup);
-    alert(`Ti sei trasformato! Ora hai il ruolo di ${role.label.toUpperCase()}.`);
-    showMyRole(role);
+    options.appendChild(btn);
   });
-  options.appendChild(btn);
+
+  document.getElementById("mitoCloseBtn").addEventListener("click", () => {
+    const el = document.getElementById("mitoPopupCustom");
+    if (el) document.body.removeChild(el);
+  });
 });
 
-
-          // aggiorna il DB: il mitomane assume il ruolo scelto
-          await db.collection("rooms").doc(currentRoomId).update({
-            [`assignments.${currentPlayerName}`]: roleId
-          });
-          document.body.removeChild(popup);
-          alert(`Ti sei trasformato! Ora hai il ruolo di ${ (r ? r.label : roleId).toUpperCase() }.`);
-          // mostra la nuova carta ruolo
-          const newRole = ROLES.find(rr => rr.id === roleId);
-          if (newRole) showMyRole(newRole);
-        });
-        options.appendChild(btn);
-      };
-
-      document.getElementById("mitoCloseBtn").addEventListener("click", () => {
-        const el = document.getElementById("mitoPopupCustom");
-        if (el) document.body.removeChild(el);
-      });
-    });
 
     // --- TERMINE PARTITA (vale per tutti i giocatori) ---
     document.getElementById("btnEndGame").addEventListener("click", async () => {
@@ -456,6 +457,7 @@ ROLES.forEach(role => {
         endedAt: Date.now(),
         endedBy: currentPlayerName || null
       });
+
       showView(viewHome);
     });
 
