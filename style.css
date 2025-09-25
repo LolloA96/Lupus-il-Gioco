@@ -4,6 +4,7 @@ body {
   font-family: Arial, sans-serif;
   background: url(img/background.png) no-repeat center center fixed !important;
   color: #fff;
+  background-size: cover !important;
 }
 
 .container {
